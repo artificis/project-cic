@@ -5,6 +5,7 @@
 }
 
 .terminal__input {
+  @extend .w-100;
   @extend .text-uppercase;
   background: none;
   border: none;
