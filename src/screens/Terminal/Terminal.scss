@@ -1,0 +1,15 @@
+.terminal {
+  @extend .container-fluid;
+  @extend .p-3;
+  height: 100vh;
+}
+
+.terminal__input {
+  @extend .text-uppercase;
+  background: none;
+  border: none;
+  color: white;
+  &:focus {
+    outline: none;
+  }
+}

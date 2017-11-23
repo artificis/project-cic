@@ -1,0 +1,14 @@
+@font-face {
+  font-family: "TTSquaresCondensed-Thin";
+  src: local("TTSquaresCondensed-Thin"), url(~fonts/TTSquaresCondensed-Thin.eot);
+  src: local("TTSquaresCondensed-Thin"), url(~fonts/TTSquaresCondensed-Thin.eot?#iefix) format("embedded-opentype"), url(~fonts/TTSquaresCondensed-Thin.woff2) format("woff2"), url(~fonts/TTSquaresCondensed-Thin.woff) format("woff"), url(~fonts/TTSquaresCondensed-Thin.ttf) format("truetype");
+}
+
+body {
+  background: black;
+  color: #afe3d7;
+  font: 1em "TTSquaresCondensed-Thin", monospace;
+  height: 100vh;
+  margin: 0;
+  // overflow: hidden;
+}
