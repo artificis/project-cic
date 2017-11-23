@@ -16,7 +16,8 @@
     "redux-actions": "^2.2.1",
     "redux-logic": "^0.12.3",
     "requestify": "^0.2.5",
-    "reselect": "^3.0.1"
+    "reselect": "^3.0.1",
+    "shortid": "^2.2.8"
   },
   "scripts": {
     "start": "react-app-rewired start",

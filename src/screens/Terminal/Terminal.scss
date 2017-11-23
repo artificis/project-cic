@@ -1,7 +1,12 @@
 .terminal {
   @extend .container-fluid;
   @extend .p-3;
+  @extend .text-uppercase;
   height: 100vh;
+
+  p {
+    margin-bottom: 0.3rem;
+  }
 }
 
 .terminal__input {
