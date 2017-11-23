@@ -21,6 +21,7 @@ export default class Terminal extends React.Component {
           className="terminal__input"
           type="text"
           ref={e => { this.promptInput = e; }}
+          autoFocus
           onKeyDown={this.handleKeyDown}
         />
       </div>
