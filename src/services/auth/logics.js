@@ -1,6 +1,8 @@
 import { createLogic } from 'redux-logic';
 import requestify from 'requestify';
+import { history } from 'store';
 import { GET_ACCESS_TOKEN, setOauthToken } from 'services/auth';
+import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
 
 const {
   REACT_APP_API_BASE_URI,
@@ -13,6 +15,8 @@ const loginLogic = createLogic({
   type: GET_ACCESS_TOKEN,
   process: async ({ action: { payload } }, dispatch, done) => {
     try {
+      dispatch(setTerminalBusy(true));
+      dispatch(log('Verifying oauth code...'));
       const response = await requestify.post(`${REACT_APP_API_BASE_URI}/gitlab/oauth/token`, {
         client_id: REACT_APP_GITLAB_APP_ID,
         client_secret: REACT_APP_GITLAB_APP_SECRET,
@@ -21,10 +25,15 @@ const loginLogic = createLogic({
         code: payload
       });
       dispatch(setOauthToken(response.getBody()));
+      dispatch(log('Oauth code verified.'));
+      dispatch(log('You are now signed in.'));
     } catch (err) {
-      const message = err.getBody().error === 'invalid_grant' ? 'Access denied' : 'Error';
-      // dispatch(setFlash(new Error(message)));
+      dispatch(log('Could not verify oauth code.'));
+      dispatch(log(JSON.stringify(err.getBody())));
     } finally {
+      dispatch(log('&nbsp;'));
+      dispatch(setTerminalBusy(false));
+      history.push('/');
       done();
     }
   }
