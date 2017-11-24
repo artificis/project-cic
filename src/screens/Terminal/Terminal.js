@@ -27,6 +27,10 @@ const mapDispatchToProps = {
 
 @connect(mapStateToProps, mapDispatchToProps)
 export default class Terminal extends React.Component {
+  state = {
+    inputValue: ''
+  };
+
   componentDidMount() {
     const qs = queryString.parse(this.props.location.search);
     if (Object.keys(qs).length > 0) {
@@ -60,11 +64,17 @@ export default class Terminal extends React.Component {
   }
 
   @autobind
+  handleInputChange(e) {
+    this.setState({ inputValue: e.target.value });
+  }
+
+  @autobind
   async handleKeyDown({ keyCode, ctrlKey, altKey, metaKey, shiftKey }) {
     if (keyCode === 13 && !ctrlKey && !altKey && !metaKey && !shiftKey) {
       const { promptInput, props: { log, setTerminalBusy } } = this;
       const input = promptInput.value.trim();
 
+      this.setState({ inputValue: '' });
       log(`${promptSymbol}${input}`);
       if (input !== '') {
         setTerminalBusy(true);
@@ -87,6 +97,8 @@ export default class Terminal extends React.Component {
             type="text"
             ref={e => { this.promptInput = e; }}
             autoFocus
+            value={this.state.inputValue}
+            onChange={this.handleInputChange}
             onKeyDown={this.handleKeyDown}
           />
         </div>);
