@@ -42,10 +42,13 @@ export default class Terminal extends React.Component {
       const input = promptInput.value.trim();
 
       spitToTerminal(`${promptSymbol}${input}`);
-      setTerminalBusy(true);
-      await evalCommand(input.toLowerCase(), spitToTerminal);
+      if (input !== '') {
+        setTerminalBusy(true);
+        if (await evalCommand(input.toLowerCase(), spitToTerminal)) {
+          setTerminalBusy(false);
+        }
+      }
       spitToTerminal('&nbsp;');
-      setTerminalBusy(false);
     }
   }
 
