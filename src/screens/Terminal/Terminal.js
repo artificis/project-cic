@@ -10,6 +10,8 @@ import {
 } from 'services/terminal';
 import evalCommand from './eval-command';
 
+const promptSymbol = '313-AMT4-030>&nbsp;';
+
 const mapStateToProps = createStructuredSelector({
   logs: terminalLogsSelector,
   isBusy: terminalBusyStateSelector
@@ -35,7 +37,7 @@ export default class Terminal extends React.Component {
       const { promptInput, props: { spitToTerminal, setTerminalBusy } } = this;
       const input = promptInput.value.trim();
 
-      spitToTerminal(`${input}&nbsp;`);
+      spitToTerminal(`${promptSymbol}${input}`);
       setTerminalBusy(true);
       await evalCommand(input.toLowerCase(), spitToTerminal);
       spitToTerminal('&nbsp;');
@@ -45,17 +47,23 @@ export default class Terminal extends React.Component {
 
   render() {
     const { logs, isBusy } = this.props;
+    const promptEl = isBusy
+      ? null
+      : (<div className="d-flex align-items-center">
+          <div dangerouslySetInnerHTML={{ __html: promptSymbol }} />
+          <input
+            className="terminal__input"
+            type="text"
+            ref={e => { this.promptInput = e; }}
+            autoFocus
+            onKeyDown={this.handleKeyDown}
+          />
+        </div>);
 
     return (
       <div className="terminal" onClick={this.handleTerminalClick}>
         {logs.map(log => <p key={shortid.generate()} dangerouslySetInnerHTML={{ __html: log }} />)}
-        {!isBusy && <input
-          className="terminal__input"
-          type="text"
-          ref={e => { this.promptInput = e; }}
-          autoFocus
-          onKeyDown={this.handleKeyDown}
-        />}
+        {promptEl}
       </div>
     );
   }

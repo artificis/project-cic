@@ -1,18 +1,22 @@
+$line-height: 23px;
+
 .terminal {
   @extend .container-fluid;
   @extend .p-3;
   height: 100vh;
 
   p {
+    height: $line-height;
     margin-bottom: 0.3rem;
   }
 }
 
 .terminal__input {
-  @extend .w-100;
   background: none;
   border: none;
   color: white;
+  flex-grow: 1;
+  height: $line-height;
   &:focus {
     outline: none;
   }
