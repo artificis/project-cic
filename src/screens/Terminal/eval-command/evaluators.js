@@ -6,7 +6,7 @@ const selector = createStructuredSelector({
   loggedIn: authenticatedSelector
 });
 
-async function login(argString, log) {
+function login(argString, log) {
   const { loggedIn } = selector(store.getState());
   if (loggedIn) {
     log('You are already signed in.');
@@ -18,6 +18,12 @@ async function login(argString, log) {
   }
 }
 
+function whoami(argString, log) {
+  log('COMING SOON..');
+  return true;
+}
+
 export {
-  login
+  login,
+  whoami
 };
