@@ -9,10 +9,16 @@
   src: local("Hermit-Light"), url(~fonts/Hermit-light.otf) format("opentype");
 }
 
+$primary-color: #afe3d7;
+
 body {
   background: black;
-  color: #afe3d7;
   font: 1em "Hermit-Light", monospace;
   height: 100vh;
   margin: 0;
+}
+
+body,
+input {
+  color: $primary-color;
 }
