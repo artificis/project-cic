@@ -24,6 +24,10 @@ const mapDispatchToProps = {
 
 @connect(mapStateToProps, mapDispatchToProps)
 export default class Terminal extends React.Component {
+  componentDidUpdate() {
+    window.scrollTo(0, this.wrapperEl.scrollHeight);
+  }
+
   @autobind
   handleTerminalClick() {
     if (this.promptInput) {
@@ -61,7 +65,11 @@ export default class Terminal extends React.Component {
         </div>);
 
     return (
-      <div className="terminal" onClick={this.handleTerminalClick}>
+      <div
+        className="terminal"
+        ref={e => { this.wrapperEl = e; }}
+        onClick={this.handleTerminalClick}
+      >
         {logs.map(log => <p key={shortid.generate()} dangerouslySetInnerHTML={{ __html: log }} />)}
         {promptEl}
       </div>

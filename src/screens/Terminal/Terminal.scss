@@ -3,7 +3,7 @@ $line-height: 23px;
 .terminal {
   @extend .container-fluid;
   @extend .p-3;
-  height: 100vh;
+  min-height: 100vh;
 
   p {
     height: $line-height;
@@ -12,10 +12,12 @@ $line-height: 23px;
 }
 
 .terminal__input {
+  @extend .p-0;
   background: none;
   border: none;
   flex-grow: 1;
   height: $line-height;
+  
   &:focus {
     outline: none;
   }
