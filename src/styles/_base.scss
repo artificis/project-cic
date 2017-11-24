@@ -4,11 +4,20 @@
   src: local("TTSquaresCondensed-Thin"), url(~fonts/TTSquaresCondensed-Thin.eot?#iefix) format("embedded-opentype"), url(~fonts/TTSquaresCondensed-Thin.woff2) format("woff2"), url(~fonts/TTSquaresCondensed-Thin.woff) format("woff"), url(~fonts/TTSquaresCondensed-Thin.ttf) format("truetype");
 }
 
+@font-face {
+  font-family: "Hermit-Light";
+  src: local("Hermit-Light"), url(~fonts/Hermit-light.otf) format("opentype");
+}
+
+$primary-color: #afe3d7;
+
 body {
   background: black;
-  color: #afe3d7;
-  font: 1em "TTSquaresCondensed-Thin", monospace;
-  height: 100vh;
+  font: 1em "Hermit-Light", monospace;
   margin: 0;
-  // overflow: hidden;
+}
+
+body,
+input {
+  color: $primary-color;
 }
