@@ -1,7 +1,6 @@
 .terminal {
   @extend .container-fluid;
   @extend .p-3;
-  @extend .text-uppercase;
   height: 100vh;
 
   p {
@@ -11,7 +10,6 @@
 
 .terminal__input {
   @extend .w-100;
-  @extend .text-uppercase;
   background: none;
   border: none;
   color: white;

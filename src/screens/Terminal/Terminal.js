@@ -33,11 +33,11 @@ export default class Terminal extends React.Component {
   async handleKeyDown({ keyCode, ctrlKey, altKey, metaKey, shiftKey }) {
     if (keyCode === 13 && !ctrlKey && !altKey && !metaKey && !shiftKey) {
       const { promptInput, props: { spitToTerminal, setTerminalBusy } } = this;
-      const input = promptInput.value.trim().toLowerCase();
+      const input = promptInput.value.trim();
 
       spitToTerminal(`${input}&nbsp;`);
       setTerminalBusy(true);
-      await evalCommand(input, spitToTerminal);
+      await evalCommand(input.toLowerCase(), spitToTerminal);
       spitToTerminal('&nbsp;');
       setTerminalBusy(false);
     }
