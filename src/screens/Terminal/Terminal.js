@@ -4,14 +4,23 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import shortid from 'shortid';
 
-import { terminalLogsSelector, terminalBusyStateSelector } from 'services/terminal';
+import {
+  terminalLogsSelector, terminalBusyStateSelector,
+  spitToTerminal, setTerminalBusy
+} from 'services/terminal';
+import evalCommand from './eval-command';
 
 const mapStateToProps = createStructuredSelector({
   logs: terminalLogsSelector,
   isBusy: terminalBusyStateSelector
 });
 
-@connect(mapStateToProps)
+const mapDispatchToProps = {
+  spitToTerminal,
+  setTerminalBusy
+};
+
+@connect(mapStateToProps, mapDispatchToProps)
 export default class Terminal extends React.Component {
   @autobind
   handleTerminalClick() {
@@ -21,9 +30,16 @@ export default class Terminal extends React.Component {
   }
 
   @autobind
-  handleKeyDown({ keyCode, ctrlKey, altKey, metaKey, shiftKey }) {
+  async handleKeyDown({ keyCode, ctrlKey, altKey, metaKey, shiftKey }) {
     if (keyCode === 13 && !ctrlKey && !altKey && !metaKey && !shiftKey) {
+      const { promptInput, props: { spitToTerminal, setTerminalBusy } } = this;
+      const input = promptInput.value.trim().toLowerCase();
 
+      spitToTerminal(`${input}&nbsp;`);
+      setTerminalBusy(true);
+      await evalCommand(input, spitToTerminal);
+      spitToTerminal('&nbsp;');
+      setTerminalBusy(false);
     }
   }
 
@@ -32,8 +48,7 @@ export default class Terminal extends React.Component {
 
     return (
       <div className="terminal" onClick={this.handleTerminalClick}>
-        {logs.map(log => <p key={shortid.generate()}>{log}</p>)}
-        <br />
+        {logs.map(log => <p key={shortid.generate()} dangerouslySetInnerHTML={{ __html: log }} />)}
         {!isBusy && <input
           className="terminal__input"
           type="text"
