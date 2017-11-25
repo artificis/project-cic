@@ -12,8 +12,11 @@ const projectsLogic = createLogic({
       dispatch(log('Pulling projects...'));
       dispatch(setProjects(await api.projects.all({ owned: true })));
     } catch (err) {
-      // dispatch(log('Could not verify oauth code.'));
-      // dispatch(log(JSON.stringify(err.getBody())));
+      if (err.statusCode === 401) {
+        dispatch(log('Error: access token is invalid or expired. Please sign out and sign in again.'));
+      } else {
+        dispatch(log(`Error: ${JSON.stringify(err.getBody())}`));
+      }
     } finally {
       dispatch(log('&nbsp;'));
       dispatch(setTerminalBusy(false));
