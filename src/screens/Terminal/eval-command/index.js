@@ -1,9 +1,9 @@
-import * as evaluators from './evaluators';
+import evaluators from './evaluators';
 
-export default async function evalCommand(input, log) {
-  const [command, ...extraArgs] = input.split(' ');
+export default function evalCommand(input, log) {
+  const [command, ...args] = input.split(' ');
   if (Object.keys(evaluators).includes(command)) {
-    return await evaluators[command](extraArgs.join(' '), log);
+    return evaluators[command]({ log, args });
   } else {
     log(`Command not found: ${command}`);
     return true;

@@ -1,7 +1,8 @@
 import { createLogic } from 'redux-logic';
 import requestify from 'requestify';
 import { history } from 'store';
-import { GET_ACCESS_TOKEN, setOauthToken } from 'services/auth';
+import { gitlabApiClient } from 'services/utils';
+import { GET_ACCESS_TOKEN, setOauthToken, setCurrentUser } from 'services/auth';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
 
 const {
@@ -24,8 +25,12 @@ const loginLogic = createLogic({
         redirect_uri: REACT_APP_GITLAB_OAUTH_REDIRECT_URI,
         code: payload
       });
-      dispatch(setOauthToken(response.getBody()));
+      const token = response.getBody();
+      dispatch(setOauthToken(token));
       dispatch(log('Oauth code verified.'));
+      dispatch(log('Pulling user info...'));
+      const api = gitlabApiClient(token.access_token);
+      dispatch(setCurrentUser(await api.users.current()));
       dispatch(log('You are now signed in.'));
     } catch (err) {
       dispatch(log('Could not verify oauth code.'));
