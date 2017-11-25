@@ -30,6 +30,7 @@ export default handleActions({
 
 // selectors
 export const authenticatedSelector = state => state.auth.token !== null;
+export const authTokenSelector = state => state.auth.token.access_token;
 export const currentUserSelector = state => state.auth.user;
 
 // logics
