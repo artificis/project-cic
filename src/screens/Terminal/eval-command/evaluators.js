@@ -38,6 +38,10 @@ class Command {
 
   @requiresAuth
   static cd({ args, log }) {
+    if (args.length === 0) {
+      return this.cdToRoot();
+    }
+
     const { projects } = selector(getState());
     const project = projects.find(p => p.path === args[0]);
     if (project) {
@@ -47,11 +51,16 @@ class Command {
     }
     return true;
   }
+
+  static cdToRoot() {
+    dispatch(setCurrentProject(null));
+    return true;
+  }
 }
 
 export default {
   login: Command.login,
   whoami: Command.whoami,
   ls: Command.ls,
-  cd: Command.cd
+  cd: Command.cd.bind(Command)
 };
