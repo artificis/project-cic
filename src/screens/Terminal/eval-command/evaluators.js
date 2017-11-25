@@ -1,19 +1,25 @@
 import { createStructuredSelector } from 'reselect';
 import store from 'store';
 import { GITLAB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
-import { projectsSelector, getProjects, setCurrentProject } from 'services/repo';
+import {
+  projectsSelector, currentProjectSelector, currentRepositoryPathSelector,
+  getProjects, setCurrentProject, getRepositoryTree
+} from 'services/repo';
 import { requiresAuth } from './decorators';
 
 const { getState, dispatch } = store;
+const state = () => selector(getState());
 const selector = createStructuredSelector({
   loggedIn: authenticatedSelector,
   user: currentUserSelector,
-  projects: projectsSelector
+  projects: projectsSelector,
+  currentProject: currentProjectSelector,
+  currentRepoPath: currentRepositoryPathSelector
 });
 
 class Command {
   static login({ log }) {
-    const { loggedIn } = selector(getState());
+    const { loggedIn } = state();
     if (loggedIn) {
       log('You are already signed in.');
       return true;
@@ -26,14 +32,22 @@ class Command {
 
   @requiresAuth
   static whoami({ log }) {
-    const { user } = selector(getState());
+    const { user } = state();
     log(user.username);
     return true;
   }
 
   @requiresAuth
   static ls() {
-    dispatch(getProjects());
+    const { currentProject, currentRepoPath } = state();
+    if (currentProject) {
+      dispatch(getRepositoryTree({
+        projectId: currentProject.id,
+        repoTreePath: currentRepoPath
+      }));
+    } else {
+      dispatch(getProjects());
+    }
   }
 
   @requiresAuth
@@ -42,7 +56,7 @@ class Command {
       return this.cdToRoot();
     }
 
-    const { projects } = selector(getState());
+    const { projects } = state();
     const project = projects.find(p => p.path === args[0]);
     if (project) {
       dispatch(setCurrentProject(project));
