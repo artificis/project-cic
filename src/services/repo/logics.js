@@ -10,7 +10,16 @@ const projectsLogic = createLogic({
     try {
       const api = gitlabApiClient(authTokenSelector(getState()));
       dispatch(log('Pulling projects...'));
-      dispatch(setProjects(await api.projects.all({ owned: true })));
+      const projects = await api.projects.all({ owned: true, order_by: 'path', sort: 'asc' });
+      const simplifiedProjects = [];
+      for (let project of projects) {
+        dispatch(log(project.path));
+        simplifiedProjects.push({
+          id: project.id,
+          path: project.path
+        });
+      }
+      dispatch(setProjects(simplifiedProjects));
     } catch (err) {
       if (err.statusCode === 401) {
         dispatch(log('Error: access token is invalid or expired. Please sign out and sign in again.'));
