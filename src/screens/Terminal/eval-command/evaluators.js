@@ -1,25 +1,12 @@
 import { createStructuredSelector } from 'reselect';
 import store from 'store';
 import { GITLAB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
+import { requiresAuth } from './decorators';
 
 const selector = createStructuredSelector({
   loggedIn: authenticatedSelector,
   user: currentUserSelector
 });
-
-function requiresAuth(target, key, descriptor) {
-  const method = descriptor.value;
-  descriptor.value = function(options) {
-    const { loggedIn } = selector(store.getState());
-    if (loggedIn) {
-      return method.apply(this, [options]);
-    } else {
-      options.log('You are not signed in.');
-      return true;
-    }
-  };
-  return descriptor;
-}
 
 class Command {
   static login({ log }) {
