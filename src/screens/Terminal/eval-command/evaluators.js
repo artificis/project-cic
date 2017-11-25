@@ -1,6 +1,7 @@
 import { createStructuredSelector } from 'reselect';
 import store from 'store';
 import { GITLAB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
+import { getProjects } from 'services/repo';
 import { requiresAuth } from './decorators';
 
 const selector = createStructuredSelector({
@@ -27,9 +28,15 @@ class Command {
     log(user.username);
     return true;
   }
+
+  @requiresAuth
+  static ls() {
+    store.dispatch(getProjects());
+  }
 }
 
 export default {
   login: Command.login,
-  whoami: Command.whoami
+  whoami: Command.whoami,
+  ls: Command.ls
 };
