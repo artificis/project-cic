@@ -1,9 +1,10 @@
 import { createStructuredSelector } from 'reselect';
 import store from 'store';
-import { GITLAB_OAUTH_URL, authenticatedSelector } from 'services/auth';
+import { GITLAB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
 
 const selector = createStructuredSelector({
-  loggedIn: authenticatedSelector
+  loggedIn: authenticatedSelector,
+  user: currentUserSelector
 });
 
 function requiresAuth(target, key, descriptor) {
@@ -11,7 +12,7 @@ function requiresAuth(target, key, descriptor) {
   descriptor.value = function(options) {
     const { loggedIn } = selector(store.getState());
     if (loggedIn) {
-      return method.apply(this, options);
+      return method.apply(this, [options]);
     } else {
       options.log('You are not signed in.');
       return true;
@@ -35,8 +36,8 @@ class Command {
 
   @requiresAuth
   static whoami({ log }) {
-    const { loggedIn, user } = selector(store.getState());
-    log('COMING SOON: WHOAMI');
+    const { user } = selector(store.getState());
+    log(user.username);
     return true;
   }
 }
