@@ -41,13 +41,21 @@ class Command {
   static ls() {
     const { currentProject, currentRepoPath } = state();
     if (currentProject) {
-      dispatch(getRepositoryTree({
-        projectId: currentProject.id,
-        repoTreePath: currentRepoPath
-      }));
+      this.lsRepositoryTree(currentProject, currentRepoPath);
     } else {
-      dispatch(getProjects());
+      this.lsProjects();
     }
+  }
+
+  static lsProjects() {
+    dispatch(getProjects());
+  }
+
+  static lsRepositoryTree(currentProject, currentRepoPath) {
+    dispatch(getRepositoryTree({
+      projectId: currentProject.id,
+      repoTreePath: currentRepoPath
+    }));
   }
 
   @requiresAuth
@@ -75,6 +83,6 @@ class Command {
 export default {
   login: Command.login,
   whoami: Command.whoami,
-  ls: Command.ls,
+  ls: Command.ls.bind(Command),
   cd: Command.cd.bind(Command)
 };
