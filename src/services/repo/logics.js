@@ -13,7 +13,7 @@ const projectsLogic = createLogic({
     const simplifiedProjects = [];
     dispatch(log('&nbsp;'));
     for (let project of projects) {
-      dispatch(log(project.path));
+      dispatch(log(`<span class="text-info">${project.path}</span>`));
       simplifiedProjects.push({
         id: project.id,
         path: project.path,
