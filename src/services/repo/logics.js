@@ -29,7 +29,7 @@ const repositoryTreeLogic = createLogic({
     const api = gitlabApiClient(authTokenSelector(getState()));
     dispatch(log('Pulling repository tree...'));
     const { projectId, repoTreePath } = payload;
-    const tree = await api.projects.repository.listTree(projectId, repoTreePath);
+    const tree = await api.projects.repository.listTree(projectId, { path: repoTreePath });
     dispatch(log('&nbsp;'));
     for (let item of tree) {
       if (item.type === 'tree') {

@@ -2,8 +2,15 @@ import { createStructuredSelector } from 'reselect';
 import store from 'store';
 import { GITLAB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
 import {
-  projectsSelector, currentProjectSelector, currentRepositoryPathSelector,
-  getProjects, setCurrentProject, getRepositoryTree
+  projectsSelector,
+  currentProjectSelector,
+  currentRepositoryTreeSelector,
+  currentRepositoryPathSelector,
+  getProjects,
+  setCurrentProject,
+  getRepositoryTree,
+  setRepositoryTree,
+  setCurrentRepositoryPath
 } from 'services/repo';
 import { command, requiresAuth } from './decorators';
 
@@ -14,6 +21,7 @@ const selector = createStructuredSelector({
   user: currentUserSelector,
   projects: projectsSelector,
   currentProject: currentProjectSelector,
+  currentRepoTree: currentRepositoryTreeSelector,
   currentRepoPath: currentRepositoryPathSelector
 });
 
@@ -68,20 +76,37 @@ class Command {
   static cd({ args, log }) {
     if (args.length === 0) {
       return this.cdToRoot();
-    }
-
-    const { projects } = state();
-    const project = projects.find(p => p.path === args[0]);
-    if (project) {
-      dispatch(setCurrentProject(project));
+    } else if (state().currentProject) {
+      return this.cdIntoRepositoryTree(args[0], log);
     } else {
-      log(`cd: no such project or directory: ${args[0]}`);
+      return this.cdIntoProject(args[0], log);
     }
-    return true;
   }
 
   static cdToRoot() {
     dispatch(setCurrentProject(null));
+    return true;
+  }
+
+  static cdIntoProject(path, log) {
+    const { projects } = state();
+    const project = projects.find(p => p.path === path);
+    if (project) {
+      dispatch(setCurrentProject(project));
+    } else {
+      log(`cd: no such project: ${path}`);
+    }
+    return true;
+  }
+
+  static cdIntoRepositoryTree(folderName, log) {
+    const { currentProject, currentRepoTree } = state();
+    const folder = currentRepoTree.find(e => e.name === folderName);
+    if (folder) {
+      dispatch(setCurrentRepositoryPath(folder.path));
+    } else {
+      log(`cd: no such directory: ${folderName}`);
+    }
     return true;
   }
 }
