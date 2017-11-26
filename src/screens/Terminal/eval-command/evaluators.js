@@ -101,7 +101,7 @@ class Command {
 
   static cdIntoRepositoryTree(folderName, log) {
     const { currentProject, currentRepoTree } = state();
-    const folder = currentRepoTree.find(e => e.name === folderName);
+    const folder = currentRepoTree.find(e => e.name === folderName && e.type === 'tree');
     if (folder) {
       dispatch(setCurrentRepositoryPath(folder.path));
     } else {
