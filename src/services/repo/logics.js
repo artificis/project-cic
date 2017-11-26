@@ -32,7 +32,11 @@ const repositoryTreeLogic = createLogic({
     const tree = await api.projects.repository.listTree(projectId, repoTreePath);
     dispatch(log('&nbsp;'));
     for (let item of tree) {
-      dispatch(log(item.name));
+      if (item.type === 'tree') {
+        dispatch(log(`<span class="text-info">${item.name}</span>`));
+      } else {
+        dispatch(log(item.name));
+      }
     }
     dispatch(setRepositoryTree(tree));
   }, {
