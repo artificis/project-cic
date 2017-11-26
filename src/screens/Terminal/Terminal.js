@@ -80,9 +80,9 @@ export default class Terminal extends React.Component {
         setTerminalBusy(true);
         if (evalCommand(input.toLowerCase(), log)) {
           setTerminalBusy(false);
+          log('&nbsp;');
         }
       }
-      log('&nbsp;');
     }
   }
 

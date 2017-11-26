@@ -11,6 +11,7 @@ const projectsLogic = createLogic({
     dispatch(log('Pulling projects...'));
     const projects = await api.projects.all({ owned: true, order_by: 'path', sort: 'asc' });
     const simplifiedProjects = [];
+    dispatch(log('&nbsp;'));
     for (let project of projects) {
       dispatch(log(project.path));
       simplifiedProjects.push({
@@ -29,10 +30,15 @@ const repositoryTreeLogic = createLogic({
     dispatch(log('Pulling repository tree...'));
     const { projectId, repoTreePath } = payload;
     const tree = await api.projects.repository.listTree(projectId, repoTreePath);
+    dispatch(log('&nbsp;'));
     for (let item of tree) {
       dispatch(log(item.name));
     }
     dispatch(setRepositoryTree(tree));
+  }, {
+    404: dispatch => {
+      dispatch(log('The repository for this project is empty.'));
+    }
   })
 });
 
