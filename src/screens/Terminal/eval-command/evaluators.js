@@ -5,7 +5,7 @@ import {
   projectsSelector, currentProjectSelector, currentRepositoryPathSelector,
   getProjects, setCurrentProject, getRepositoryTree
 } from 'services/repo';
-import { requiresAuth } from './decorators';
+import { command, requiresAuth } from './decorators';
 
 const { getState, dispatch } = store;
 const state = () => selector(getState());
@@ -18,6 +18,9 @@ const selector = createStructuredSelector({
 });
 
 class Command {
+  static commands = {};
+
+  @command()
   static login({ log }) {
     const { loggedIn } = state();
     if (loggedIn) {
@@ -30,6 +33,7 @@ class Command {
     }
   }
 
+  @command()
   @requiresAuth
   static whoami({ log }) {
     const { user } = state();
@@ -37,6 +41,7 @@ class Command {
     return true;
   }
 
+  @command()
   @requiresAuth
   static ls() {
     const { currentProject, currentRepoPath } = state();
@@ -58,6 +63,7 @@ class Command {
     }));
   }
 
+  @command()
   @requiresAuth
   static cd({ args, log }) {
     if (args.length === 0) {
@@ -80,9 +86,4 @@ class Command {
   }
 }
 
-export default {
-  login: Command.login,
-  whoami: Command.whoami,
-  ls: Command.ls.bind(Command),
-  cd: Command.cd.bind(Command)
-};
+export default Command.commands;
