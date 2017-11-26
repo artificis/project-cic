@@ -34,7 +34,9 @@ const loginLogic = createLogic({
       dispatch(log('You are now signed in.'));
     } catch (err) {
       dispatch(log('Could not verify oauth code.'));
-      dispatch(log(JSON.stringify(err.getBody())));
+      if (typeof err.getBody === 'function') {
+        dispatch(log(JSON.stringify(err.getBody())));
+      }
     } finally {
       dispatch(log('&nbsp;'));
       dispatch(setTerminalBusy(false));
