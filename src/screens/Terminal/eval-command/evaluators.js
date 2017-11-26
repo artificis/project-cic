@@ -123,6 +123,16 @@ class Command {
     }
     return true;
   }
+
+  @command()
+  static pwd({ log }) {
+    const { currentProject, currentRepoPath } = state();
+    const pathItems = [];
+    if (currentProject) pathItems.push(currentProject.path);
+    if (currentRepoPath !== '') pathItems.push(currentRepoPath);
+    log(`/${pathItems.join('/')}`);
+    return true;
+  }
 }
 
 export default Command.commands;
