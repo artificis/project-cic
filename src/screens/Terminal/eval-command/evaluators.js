@@ -76,6 +76,8 @@ class Command {
   static cd({ args, log }) {
     if (args.length === 0) {
       return this.cdToRoot();
+    } else if (args[0] === '..') {
+      return this.cdUpwards();
     } else if (state().currentProject) {
       return this.cdIntoRepositoryTree(args[0], log);
     } else {
@@ -85,6 +87,18 @@ class Command {
 
   static cdToRoot() {
     dispatch(setCurrentProject(null));
+    return true;
+  }
+
+  static cdUpwards() {
+    const { currentProject, currentRepoPath } = state();
+    if (currentRepoPath !== '') {
+      const pathItems = currentRepoPath.split('/');
+      pathItems.pop();
+      dispatch(setCurrentRepositoryPath(pathItems.join('/')));
+    } else if (currentProject) {
+      this.cdToRoot();
+    }
     return true;
   }
 

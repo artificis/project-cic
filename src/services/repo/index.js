@@ -21,7 +21,7 @@ const initialState = {
   projects: [],
   currentProject: null,
   currentRepositoryTree: [],
-  currentRepositoryPath: null
+  currentRepositoryPath: ''
 };
 
 export default handleActions({
@@ -33,7 +33,7 @@ export default handleActions({
     ...state,
     currentProject: payload,
     currentRepositoryTree: [],
-    currentRepositoryPath: null
+    currentRepositoryPath: ''
   }),
   [SET_REPOSITORY_TREE]: (state, { payload }) => ({
     ...state,
