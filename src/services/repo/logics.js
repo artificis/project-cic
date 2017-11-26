@@ -16,7 +16,8 @@ const projectsLogic = createLogic({
       dispatch(log(project.path));
       simplifiedProjects.push({
         id: project.id,
-        path: project.path
+        path: project.path,
+        defaultBranch: project.default_branch
       });
     }
     dispatch(setProjects(simplifiedProjects));
