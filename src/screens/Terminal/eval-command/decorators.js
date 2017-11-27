@@ -6,9 +6,10 @@ const selector = createStructuredSelector({
   loggedIn: authenticatedSelector
 });
 
-export function command(commandName = null) {
+export function command(description, commandName = null) {
   return function(target, key, descriptor) {
     target.commands[commandName || key] = descriptor.value.bind(target);
+    target.commandDescriptions[commandName || key] = description;
     return descriptor;
   }
 }

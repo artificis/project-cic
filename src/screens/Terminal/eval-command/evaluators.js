@@ -28,8 +28,20 @@ const selector = createStructuredSelector({
 
 class Command {
   static commands = {};
+  static commandDescriptions = {};
 
   @command()
+  static help({ log }) {
+    log('&nbsp;');
+    const maxCmdLength = Math.max(...Object.keys(this.commandDescriptions).map(e => e.length));
+    for (let [cmd, desc] of Object.entries(this.commandDescriptions)) {
+      if (cmd === 'help') continue;
+      log(`${cmd.padEnd(maxCmdLength + 3).replace(/ /g, '&nbsp;')}<span class="text-secondary">${desc}</span>`);
+    }
+    return true;
+  }
+
+  @command('let user log in')
   static login({ log }) {
     const { loggedIn } = state();
     if (loggedIn) {
@@ -42,7 +54,7 @@ class Command {
     }
   }
 
-  @command()
+  @command("show current user's username")
   @requiresAuth
   static whoami({ log }) {
     const { user } = state();
@@ -50,7 +62,7 @@ class Command {
     return true;
   }
 
-  @command()
+  @command('list projects or repository tree')
   @requiresAuth
   static ls() {
     const { currentProject, currentRepoPath } = state();
@@ -72,7 +84,7 @@ class Command {
     }));
   }
 
-  @command()
+  @command('get into project or repository tree folder')
   @requiresAuth
   static cd({ args, log }) {
     if (args.length === 0) {
@@ -125,7 +137,7 @@ class Command {
     return true;
   }
 
-  @command()
+  @command('print current working directory')
   @requiresAuth
   static pwd({ log }) {
     const { currentProject, currentRepoPath } = state();
@@ -136,7 +148,7 @@ class Command {
     return true;
   }
 
-  @command('new')
+  @command('prepare a new CIC file with specified image and open a modal', 'new')
   @requiresAuth
   static newFile({ args, log }) {
     const { currentProject, currentRepoPath } = state();
@@ -177,7 +189,7 @@ class Command {
     fileInput.click();
   }
 
-  @command()
+  @command('open an existing CIC file')
   @requiresAuth
   static open({ args, log }) {
     const { currentProject, currentRepoTree, currentRepoPath } = state();
