@@ -9,6 +9,11 @@
   src: local("Hermit-Light"), url(~fonts/Hermit-light.otf) format("opentype");
 }
 
+@font-face {
+  font-family: "SF-Pro-Display";
+  src: local("SF-Pro-Display"), url(~fonts/SF-Pro-Display-Regular.otf) format("opentype");
+}
+
 $primary-color: #afe3d7;
 
 body {
@@ -20,4 +25,8 @@ body {
 body,
 input {
   color: $primary-color;
+}
+
+.modal {
+  font-family: "SF-Pro-Display";
 }
