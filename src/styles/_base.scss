@@ -27,6 +27,11 @@ input {
   color: $primary-color;
 }
 
+.nav-link {
+  cursor: default;
+}
+
 .modal {
+  color: initial;
   font-family: "SF-Pro-Display";
 }

@@ -10,10 +10,10 @@ import {
   getProjects,
   setCurrentProject,
   getRepositoryTree,
-  setRepositoryTree,
   setCurrentRepositoryPath,
   createFile
 } from 'services/repo';
+import { openModal } from 'services/modal';
 import { command, requiresAuth } from './decorators';
 
 const { getState, dispatch } = store;
@@ -116,7 +116,7 @@ class Command {
   }
 
   static cdIntoRepositoryTree(folderName, log) {
-    const { currentProject, currentRepoTree } = state();
+    const { currentRepoTree } = state();
     const folder = currentRepoTree.find(e => e.name === folderName && e.type === 'tree');
     if (folder) {
       dispatch(setCurrentRepositoryPath(folder.path));
@@ -155,18 +155,20 @@ class Command {
         if (fileInput.files.length > 0) {
           const reader = new FileReader();
           reader.onload = () => {
+            const imageBlob = atob(reader.result.split(',')[1]);
             log('Image file read.');
-            const imageData = atob(reader.result.split(',')[1]);
-            dispatch(createFile({
-              projectId: currentProject.id,
-              filePath: encodeURIComponent(`${currentRepoPath}/${args[0]}`),
-              branch: currentProject.defaultBranch || 'master',
-              options: {
-                content: btoa(`${imageData}PROJECT-CIC${btoa(JSON.stringify({}))}`),
-                commit_message: 'Test commit',
-                encoding: 'base64'
-              }
-            }));
+            // dispatch(createFile({
+            //   projectId: currentProject.id,
+            //   filePath: encodeURIComponent(`${currentRepoPath}/${args[0]}`),
+            //   branch: currentProject.defaultBranch || 'master',
+            //   options: {
+            //     content: btoa(`${imageBlob}PROJECT-CIC${btoa(JSON.stringify({}))}`),
+            //     commit_message: 'Test commit',
+            //     encoding: 'base64'
+            //   }
+            // }));
+            log('Now in edit/view mode...');
+            dispatch(openModal({ imageBlob, mode: 'create' }));
           };
           dispatch(setTerminalBusy(true));
           log('Reading image file...');

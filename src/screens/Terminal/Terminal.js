@@ -11,6 +11,7 @@ import {
   setTerminalBusy, spitToTerminal as log
 } from 'services/terminal';
 import evalCommand from './eval-command';
+import EditorModal from './EditorModal';
 
 const promptSymbol = '313-AMT4-030>&nbsp;';
 
@@ -111,6 +112,7 @@ export default class Terminal extends React.Component {
       >
         {logs.map(log => <p key={shortid.generate()} dangerouslySetInnerHTML={{ __html: log }} />)}
         {promptEl}
+        <EditorModal />
       </div>
     );
   }
