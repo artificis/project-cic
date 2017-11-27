@@ -10,9 +10,11 @@ import {
 import classnames from 'classnames';
 import { modalOpenSelector, cicDataSelector, closeModal, setCicData } from 'services/modal';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
+import TableView from './TableView';
 
 import 'brace/mode/json';
 import 'brace/theme/solarized_light';
+import 'brace/ext/searchbox';
 
 const mapStateToProps = createStructuredSelector({
   open: modalOpenSelector,
@@ -66,12 +68,19 @@ export default class EditorModal extends React.Component {
 
   @autobind
   handleViewTabClick() {
-    this.switchTabTo('view');
-    console.log(this.state.cicDataText);
+    try {
+      const json = JSON.parse(this.state.cicDataText);
+      this.props.setCicData(json);
+      this.switchTabTo('view');
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        alert('Invalid JSON data');
+      }
+    }
   }
 
   render() {
-    const { open } = this.props;
+    const { open, cicData } = this.props;
     const { activeTab, cicDataText } = this.state;
 
     return (
@@ -110,7 +119,7 @@ export default class EditorModal extends React.Component {
               />
             </TabPane>
             <TabPane tabId="view" className="py-3">
-              <p>Look at me</p>
+              <TableView data={cicData} />
             </TabPane>
           </TabContent>
         </ModalBody>

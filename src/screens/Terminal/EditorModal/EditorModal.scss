@@ -3,5 +3,12 @@
 
   .modal-body   { height: 85vh; }
   .tab-content  { height: 95%; }
-  .tab-pane     { height: 100%; }
+  .tab-pane {
+    height: 100%;
+    overflow-y: scroll;
+  }
+}
+
+.cic-data-table caption {
+  caption-side: top;
 }
