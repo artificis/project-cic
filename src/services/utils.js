@@ -1,11 +1,17 @@
 import getGitLabApiClient from 'node-gitlab-api';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
+import { setModalUiEnabled } from 'services/modal';
 
 export const gitlabApiClient = oauthToken => getGitLabApiClient({ oauthToken });
 
-export function withCommonErrorHandling(processFunc, errHandlers = {}) {
+export function withCommonErrorHandling(
+  processFunc,
+  errHandlers = {},
+  { callSetTerminalBusy = true } = {}
+) {
   return async (depObj, dispatch, done) => {
     try {
+      dispatch(setModalUiEnabled(false));
       await processFunc(depObj, dispatch);
     } catch (err) {
       if (err.name === 'StatusCodeError') {
@@ -20,8 +26,11 @@ export function withCommonErrorHandling(processFunc, errHandlers = {}) {
         dispatch(log(`Error: ${err.message}`));
       }
     } finally {
-      dispatch(log('&nbsp;'));
-      dispatch(setTerminalBusy(false));
+      dispatch(setModalUiEnabled(true));
+      if (callSetTerminalBusy) {
+        dispatch(log('&nbsp;'));
+        dispatch(setTerminalBusy(false));
+      }
       done();
     }
   }

@@ -6,6 +6,7 @@ import {
   setProjects, setRepositoryTree
 } from 'services/repo';
 import { spitToTerminal as log } from 'services/terminal';
+import { setModalMode } from 'services/modal';
 
 const projectsLogic = createLogic({
   type: GET_PROJECTS,
@@ -58,6 +59,9 @@ const newFileLogic = createLogic({
     const { projectId, filePath, branch, options } = payload;
     await api.projects.repository.createFile(projectId, filePath, branch, options);
     dispatch(log('New file created.'));
+    dispatch(setModalMode('update'));
+  }, {}, {
+    callSetTerminalBusy: false
   })
 });
 

@@ -8,8 +8,13 @@ import {
   Nav, NavItem, NavLink, TabContent, TabPane
 } from 'reactstrap';
 import classnames from 'classnames';
-import { modalOpenSelector, cicDataSelector, closeModal, setCicData } from 'services/modal';
+import {
+  modalOpenSelector, modalUiEnabledSelector, modalModeSelector,
+  modalFilePathSelector,imageBlobSelector, cicDataSelector,
+  closeModal, setCicData
+} from 'services/modal';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
+import { currentProjectSelector, createFile } from 'services/repo';
 import TableView from './TableView';
 
 import 'brace/mode/json';
@@ -18,14 +23,20 @@ import 'brace/ext/searchbox';
 
 const mapStateToProps = createStructuredSelector({
   open: modalOpenSelector,
-  cicData: cicDataSelector
+  uiEnabled: modalUiEnabledSelector,
+  mode: modalModeSelector,
+  filePath: modalFilePathSelector,
+  imageBlob: imageBlobSelector,
+  cicData: cicDataSelector,
+  currentProject: currentProjectSelector
 });
 
 const mapDispatchToProps = {
   closeModal,
   setCicData,
   log,
-  setTerminalBusy
+  setTerminalBusy,
+  createFile
 };
 
 @connect(mapStateToProps, mapDispatchToProps)
@@ -45,14 +56,6 @@ export default class EditorModal extends React.Component {
     if (this.state.activeTab !== tabId) {
       this.setState({ activeTab: tabId });
     }
-  }
-
-  @autobind
-  handleCloseClick() {
-    const { closeModal, log, setTerminalBusy } = this.props;
-    closeModal();
-    log('&nbsp;');
-    setTerminalBusy(false);
   }
 
   @autobind
@@ -80,8 +83,35 @@ export default class EditorModal extends React.Component {
     }
   }
 
+  @autobind
+  handleSaveClick() {
+    const { mode, filePath, imageBlob, cicData, currentProject, createFile } = this.props;
+    if (mode === 'create') {
+      createFile({
+        projectId: currentProject.id,
+        filePath: encodeURIComponent(filePath),
+        branch: currentProject.defaultBranch || 'master',
+        options: {
+          content: btoa(`${imageBlob}PROJECT-CIC${btoa(JSON.stringify(cicData))}`),
+          commit_message: 'Test commit',
+          encoding: 'base64'
+        }
+      });
+    } else if (mode === 'update') {
+      console.log('TODO')
+    }
+  }
+
+  @autobind
+  handleCloseClick() {
+    const { closeModal, log, setTerminalBusy } = this.props;
+    closeModal();
+    log('&nbsp;');
+    setTerminalBusy(false);
+  }
+
   render() {
-    const { open, cicData } = this.props;
+    const { open, uiEnabled, cicData } = this.props;
     const { activeTab, cicDataText } = this.state;
 
     return (
@@ -90,6 +120,7 @@ export default class EditorModal extends React.Component {
           <Nav tabs>
             <NavItem>
               <NavLink
+                disabled={!uiEnabled}
                 className={classnames({ active: activeTab === 'edit' })}
                 onClick={this.handleEditTabClick}
               >
@@ -98,6 +129,7 @@ export default class EditorModal extends React.Component {
             </NavItem>
             <NavItem>
               <NavLink
+                disabled={!uiEnabled}
                 className={classnames({ active: activeTab === 'view' })}
                 onClick={this.handleViewTabClick}
               >
@@ -126,9 +158,9 @@ export default class EditorModal extends React.Component {
           </TabContent>
         </ModalBody>
         <ModalFooter>
-          <Button color="primary" size="sm" role="button">Save</Button>
-          <Button color="primary" outline size="sm">Save & Close</Button>
-          <Button color="secondary" outline size="sm" onClick={this.handleCloseClick}>Close</Button>
+          <Button disabled={!uiEnabled} color="primary" size="sm" onClick={this.handleSaveClick}>Save</Button>
+          <Button disabled={!uiEnabled} color="primary" outline size="sm">Save & Close</Button>
+          <Button disabled={!uiEnabled} color="secondary" outline size="sm" onClick={this.handleCloseClick}>Close</Button>
         </ModalFooter>
       </Modal>
     );

@@ -10,8 +10,7 @@ import {
   getProjects,
   setCurrentProject,
   getRepositoryTree,
-  setCurrentRepositoryPath,
-  createFile
+  setCurrentRepositoryPath
 } from 'services/repo';
 import { openModal } from 'services/modal';
 import { command, requiresAuth } from './decorators';
@@ -157,18 +156,12 @@ class Command {
           reader.onload = () => {
             const imageBlob = atob(reader.result.split(',')[1]);
             log('Image file read.');
-            // dispatch(createFile({
-            //   projectId: currentProject.id,
-            //   filePath: encodeURIComponent(`${currentRepoPath}/${args[0]}`),
-            //   branch: currentProject.defaultBranch || 'master',
-            //   options: {
-            //     content: btoa(`${imageBlob}PROJECT-CIC${btoa(JSON.stringify({}))}`),
-            //     commit_message: 'Test commit',
-            //     encoding: 'base64'
-            //   }
-            // }));
             log('Now in edit/view mode...');
-            dispatch(openModal({ imageBlob, mode: 'create' }));
+            dispatch(openModal({
+              imageBlob,
+              mode: 'create',
+              filePath: `${currentRepoPath}/${args[0]}`
+            }));
           };
           dispatch(setTerminalBusy(true));
           log('Reading image file...');
