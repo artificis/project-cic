@@ -11,10 +11,10 @@ import classnames from 'classnames';
 import {
   modalOpenSelector, modalUiEnabledSelector, modalModeSelector,
   modalFilePathSelector,imageBlobSelector, cicDataSelector,
-  closeModal, setCicData
+  closeModal, setCicData, createFile
 } from 'services/modal';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
-import { currentProjectSelector, createFile } from 'services/repo';
+import { currentProjectSelector } from 'services/repo';
 import TableView from './TableView';
 
 import 'brace/mode/json';

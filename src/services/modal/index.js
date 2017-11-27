@@ -8,6 +8,7 @@ export const SET_CIC_DATA = 'SET_CIC_DATA';
 export const CLOSE_MODAL = 'CLOSE_MODAL';
 export const COMMIT_AND_CLOSE_MODAL = 'COMMIT_AND_CLOSE_MODAL';
 export const COMMIT_DATA = 'COMMIT_DATA';
+export const CREATE_FILE = 'CREATE_FILE';
 
 // action creators
 export const openModal = createAction(OPEN_MODAL);
@@ -17,6 +18,7 @@ export const setCicData = createAction(SET_CIC_DATA);
 export const closeModal = createAction(CLOSE_MODAL);
 export const commitAndCloseModal = createAction(COMMIT_AND_CLOSE_MODAL);
 export const commitData = createAction(COMMIT_DATA);
+export const createFile = createAction(CREATE_FILE);
 
 // reducer
 const initialState = {
@@ -61,3 +63,6 @@ export const modalModeSelector = state => state.modal.mode;
 export const modalFilePathSelector = state => state.modal.filePath;
 export const imageBlobSelector = state => state.modal.imageBlob;
 export const cicDataSelector = state => state.modal.cicData;
+
+// logics
+export const logics = require('./logics').default;

@@ -7,7 +7,6 @@ export const SET_CURRENT_PROJECT = 'SET_CURRENT_PROJECT';
 export const GET_REPOSITORY_TREE = 'GET_REPOSITORY_TREE';
 export const SET_REPOSITORY_TREE = 'SET_REPOSITORY_TREE';
 export const SET_CURRENT_REPOSITORY_PATH = 'SET_CURRENT_REPOSITORY_PATH';
-export const CREATE_FILE = 'CREATE_FILE';
 
 // action creators
 export const getProjects = createAction(GET_PROJECTS);
@@ -16,7 +15,6 @@ export const setCurrentProject = createAction(SET_CURRENT_PROJECT);
 export const getRepositoryTree = createAction(GET_REPOSITORY_TREE);
 export const setRepositoryTree = createAction(SET_REPOSITORY_TREE);
 export const setCurrentRepositoryPath = createAction(SET_CURRENT_REPOSITORY_PATH);
-export const createFile = createAction(CREATE_FILE);
 
 // reducer
 const initialState = {
