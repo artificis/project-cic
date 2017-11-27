@@ -1,6 +1,7 @@
 import { createStructuredSelector } from 'reselect';
 import store from 'store';
 import { GITLAB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
+import { setTerminalBusy } from 'services/terminal';
 import {
   projectsSelector,
   currentProjectSelector,
@@ -9,9 +10,9 @@ import {
   getProjects,
   setCurrentProject,
   getRepositoryTree,
-  setRepositoryTree,
   setCurrentRepositoryPath
 } from 'services/repo';
+import { openModal } from 'services/modal';
 import { command, requiresAuth } from './decorators';
 
 const { getState, dispatch } = store;
@@ -114,7 +115,7 @@ class Command {
   }
 
   static cdIntoRepositoryTree(folderName, log) {
-    const { currentProject, currentRepoTree } = state();
+    const { currentRepoTree } = state();
     const folder = currentRepoTree.find(e => e.name === folderName && e.type === 'tree');
     if (folder) {
       dispatch(setCurrentRepositoryPath(folder.path));
@@ -125,6 +126,7 @@ class Command {
   }
 
   @command()
+  @requiresAuth
   static pwd({ log }) {
     const { currentProject, currentRepoPath } = state();
     const pathItems = [];
@@ -132,6 +134,47 @@ class Command {
     if (currentRepoPath !== '') pathItems.push(currentRepoPath);
     log(`/${pathItems.join('/')}`);
     return true;
+  }
+
+  @command('new')
+  @requiresAuth
+  static newFile({ args, log }) {
+    const { currentProject, currentRepoPath } = state();
+    if (args.length === 0) {
+      log('usage:');
+      log('new &lt;filename&gt;');
+    } else if (currentProject === null) {
+      log('You are currently not inside a project repository.');
+    } else {
+      this.openNewImageFileDialog(`${currentRepoPath}/${args[0]}`, log);
+    }
+    return true;
+  }
+
+  static openNewImageFileDialog(filePath, log) {
+    const fileInput = document.createElement('input');
+    log('Please choose an image file.');
+    fileInput.type = 'file';
+    fileInput.accept = '.jpg,.jpeg,.png';
+    fileInput.onchange = () => {
+      if (fileInput.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const imageBlob = atob(reader.result.split(',')[1]);
+          log('Image file read.');
+          log('Now in edit/view mode...');
+          dispatch(openModal({
+            imageBlob,
+            filePath,
+            mode: 'create'
+          }));
+        };
+        dispatch(setTerminalBusy(true));
+        log('Reading image file...');
+        reader.readAsDataURL(fileInput.files[0]);
+      }
+    };
+    fileInput.click();
   }
 }
 

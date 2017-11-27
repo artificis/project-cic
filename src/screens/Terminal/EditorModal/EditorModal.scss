@@ -1,0 +1,25 @@
+#cic_data_modal {
+  max-width: 95%;
+
+  .modal-body   { height: 85vh; }
+  .tab-content  { height: 95%; }
+  .tab-pane {
+    height: 100%;
+    overflow-y: scroll;
+  }
+}
+
+.cic-data-table {
+  caption {
+    caption-side: top;
+  }
+
+  p {
+    margin-bottom: 0;
+  }
+
+  thead th,
+  td {
+    vertical-align: middle;
+  }
+}
