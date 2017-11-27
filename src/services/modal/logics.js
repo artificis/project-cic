@@ -1,7 +1,7 @@
 import { createLogic } from 'redux-logic';
 import { withCommonErrorHandling, gitlabApiClient } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
-import { CREATE_FILE } from 'services/modal';
+import { CREATE_FILE, UPDATE_FILE } from 'services/modal';
 import { spitToTerminal as log } from 'services/terminal';
 import { setModalMode } from 'services/modal';
 
@@ -19,6 +19,20 @@ const newFileLogic = createLogic({
   })
 });
 
+const fileUpdateLogic = createLogic({
+  type: UPDATE_FILE,
+  process: withCommonErrorHandling(async ({ getState, action: { payload } }, dispatch) => {
+    const api = gitlabApiClient(authTokenSelector(getState()));
+    dispatch(log('Updating file...'));
+    const { projectId, filePath, branch, options } = payload;
+    await api.projects.repository.updateFile(projectId, filePath, branch, options);
+    dispatch(log('File updated.'));
+  }, {}, {
+    callSetTerminalBusy: false
+  })
+});
+
 export default [
-  newFileLogic
+  newFileLogic,
+  fileUpdateLogic
 ];

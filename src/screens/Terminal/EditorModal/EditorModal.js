@@ -11,7 +11,7 @@ import classnames from 'classnames';
 import {
   modalOpenSelector, modalUiEnabledSelector, modalModeSelector,
   modalFilePathSelector,imageBlobSelector, cicDataSelector,
-  closeModal, setCicData, createFile
+  closeModal, setCicData, createFile, updateFile
 } from 'services/modal';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
 import { currentProjectSelector } from 'services/repo';
@@ -36,7 +36,8 @@ const mapDispatchToProps = {
   setCicData,
   log,
   setTerminalBusy,
-  createFile
+  createFile,
+  updateFile
 };
 
 @connect(mapStateToProps, mapDispatchToProps)
@@ -85,20 +86,35 @@ export default class EditorModal extends React.Component {
 
   @autobind
   handleSaveClick() {
-    const { mode, filePath, imageBlob, cicData, currentProject, createFile } = this.props;
-    if (mode === 'create') {
-      createFile({
-        projectId: currentProject.id,
-        filePath: encodeURIComponent(filePath),
-        branch: currentProject.defaultBranch || 'master',
-        options: {
-          content: btoa(`${imageBlob}PROJECT-CIC${btoa(JSON.stringify(cicData))}`),
-          commit_message: 'Test commit',
-          encoding: 'base64'
-        }
-      });
-    } else if (mode === 'update') {
-      console.log('TODO')
+    const {
+      mode, filePath, imageBlob, cicData, currentProject,
+      setCicData, createFile, updateFile
+    } = this.props;
+    const { activeTab, cicDataText } = this.state;
+    const saveFile = mode === 'create' ? createFile : updateFile;
+    try {
+      let data = cicData;
+      if (activeTab === 'edit') {
+        data = JSON.parse(cicDataText);
+        setCicData(data);
+      }
+      if (['create', 'update'].includes(mode)) {
+        saveFile({
+          projectId: currentProject.id,
+          filePath: encodeURIComponent(filePath),
+          branch: currentProject.defaultBranch || 'master',
+          options: {
+            content: btoa(`${imageBlob}PROJECT-CIC${btoa(JSON.stringify(data))}`),
+            commit_message: 'Test commit',
+            encoding: 'base64'
+          }
+        });
+      }
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        this.aceEditor.editor.focus();
+        alert('Invalid JSON data');
+      }
     }
   }
 

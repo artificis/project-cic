@@ -9,6 +9,7 @@ export const CLOSE_MODAL = 'CLOSE_MODAL';
 export const COMMIT_AND_CLOSE_MODAL = 'COMMIT_AND_CLOSE_MODAL';
 export const COMMIT_DATA = 'COMMIT_DATA';
 export const CREATE_FILE = 'CREATE_FILE';
+export const UPDATE_FILE = 'UPDATE_FILE';
 
 // action creators
 export const openModal = createAction(OPEN_MODAL);
@@ -19,6 +20,7 @@ export const closeModal = createAction(CLOSE_MODAL);
 export const commitAndCloseModal = createAction(COMMIT_AND_CLOSE_MODAL);
 export const commitData = createAction(COMMIT_DATA);
 export const createFile = createAction(CREATE_FILE);
+export const updateFile = createAction(UPDATE_FILE);
 
 // reducer
 const initialState = {
