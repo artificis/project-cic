@@ -44,6 +44,7 @@ const modalCloseLogic = createLogic({
     dispatch(log('Exiting from edit/view mode...'));
     dispatch(log('&nbsp;'));
     dispatch(setTerminalBusy(false));
+    done();
   }
 });
 
