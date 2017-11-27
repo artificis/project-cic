@@ -85,7 +85,7 @@ export default class EditorModal extends React.Component {
   }
 
   @autobind
-  handleSaveClick() {
+  handleSaveClick(closeModalAfterSave = false) {
     const {
       mode, filePath, imageBlob, cicData, currentProject,
       setCicData, createFile, updateFile
@@ -98,18 +98,17 @@ export default class EditorModal extends React.Component {
         data = JSON.parse(cicDataText);
         setCicData(data);
       }
-      if (['create', 'update'].includes(mode)) {
-        saveFile({
-          projectId: currentProject.id,
-          filePath: encodeURIComponent(filePath),
-          branch: currentProject.defaultBranch || 'master',
-          options: {
-            content: btoa(`${imageBlob}PROJECT-CIC${btoa(JSON.stringify(data))}`),
-            commit_message: 'Test commit',
-            encoding: 'base64'
-          }
-        });
-      }
+      saveFile({
+        closeModalAfterSave,
+        projectId: currentProject.id,
+        filePath: encodeURIComponent(filePath),
+        branch: currentProject.defaultBranch || 'master',
+        options: {
+          content: btoa(`${imageBlob}PROJECT-CIC${btoa(JSON.stringify(data))}`),
+          commit_message: 'Test commit',
+          encoding: 'base64'
+        }
+      });
     } catch (err) {
       if (err instanceof SyntaxError) {
         this.aceEditor.editor.focus();
@@ -174,8 +173,8 @@ export default class EditorModal extends React.Component {
           </TabContent>
         </ModalBody>
         <ModalFooter>
-          <Button disabled={!uiEnabled} color="primary" size="sm" onClick={this.handleSaveClick}>Save</Button>
-          <Button disabled={!uiEnabled} color="primary" outline size="sm">Save & Close</Button>
+          <Button disabled={!uiEnabled} color="primary" size="sm" onClick={() => this.handleSaveClick()}>Save</Button>
+          <Button disabled={!uiEnabled} color="primary" outline size="sm" onClick={() => this.handleSaveClick(true)}>Save & Close</Button>
           <Button disabled={!uiEnabled} color="secondary" outline size="sm" onClick={this.handleCloseClick}>Close</Button>
         </ModalFooter>
       </Modal>

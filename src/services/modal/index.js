@@ -6,8 +6,6 @@ export const SET_MODAL_UI_ENABLED = 'SET_MODAL_UI_ENABLED';
 export const SET_MODAL_MODE = 'SET_MODAL_MODE';
 export const SET_CIC_DATA = 'SET_CIC_DATA';
 export const CLOSE_MODAL = 'CLOSE_MODAL';
-export const COMMIT_AND_CLOSE_MODAL = 'COMMIT_AND_CLOSE_MODAL';
-export const COMMIT_DATA = 'COMMIT_DATA';
 export const CREATE_FILE = 'CREATE_FILE';
 export const UPDATE_FILE = 'UPDATE_FILE';
 
@@ -17,8 +15,6 @@ export const setModalUiEnabled = createAction(SET_MODAL_UI_ENABLED);
 export const setModalMode = createAction(SET_MODAL_MODE);
 export const setCicData = createAction(SET_CIC_DATA);
 export const closeModal = createAction(CLOSE_MODAL);
-export const commitAndCloseModal = createAction(COMMIT_AND_CLOSE_MODAL);
-export const commitData = createAction(COMMIT_DATA);
 export const createFile = createAction(CREATE_FILE);
 export const updateFile = createAction(UPDATE_FILE);
 
@@ -54,7 +50,10 @@ export default handleActions({
   }),
   [CLOSE_MODAL]: state => ({
     ...state,
-    open: false
+    open: false,
+    filePath: null,
+    imageBlob: null,
+    cicData: {}
   })
 }, initialState);
 
