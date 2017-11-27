@@ -2,13 +2,17 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import autobind from 'autobind-decorator';
+import AceEditor from 'react-ace';
 import {
-  Modal, ModalBody, ModalFooter, Button, Input,
+  Modal, ModalBody, ModalFooter, Button,
   Nav, NavItem, NavLink, TabContent, TabPane
 } from 'reactstrap';
 import classnames from 'classnames';
 import { modalOpenSelector, cicDataSelector, closeModal, setCicData } from 'services/modal';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
+
+import 'brace/mode/json';
+import 'brace/theme/solarized_light';
 
 const mapStateToProps = createStructuredSelector({
   open: modalOpenSelector,
@@ -50,12 +54,24 @@ export default class EditorModal extends React.Component {
   }
 
   @autobind
-  handleCicDataTextAreaChange(e) {
-    this.setState({ cicDataText: e.target.value });
+  handleAceEditorChange(newValue) {
+    this.setState({ cicDataText: newValue });
+  }
+
+  @autobind
+  handleEditTabClick() {
+    this.switchTabTo('edit');
+    this.aceEditor.editor.focus();
+  }
+
+  @autobind
+  handleViewTabClick() {
+    this.switchTabTo('view');
+    console.log(this.state.cicDataText);
   }
 
   render() {
-    const { open, cicData } = this.props;
+    const { open } = this.props;
     const { activeTab, cicDataText } = this.state;
 
     return (
@@ -65,7 +81,7 @@ export default class EditorModal extends React.Component {
             <NavItem>
               <NavLink
                 className={classnames({ active: activeTab === 'edit' })}
-                onClick={() => this.switchTabTo('edit')}
+                onClick={this.handleEditTabClick}
               >
                 Edit
               </NavLink>
@@ -73,7 +89,7 @@ export default class EditorModal extends React.Component {
             <NavItem>
               <NavLink
                 className={classnames({ active: activeTab === 'view' })}
-                onClick={() => this.switchTabTo('view')}
+                onClick={this.handleViewTabClick}
               >
                 View
               </NavLink>
@@ -81,11 +97,16 @@ export default class EditorModal extends React.Component {
           </Nav>
           <TabContent activeTab={activeTab}>
             <TabPane tabId="edit" className="py-3">
-              <Input
-                type="textarea"
-                id="cic_data"
+              <AceEditor
+                mode="json"
+                theme="solarized_light"
                 value={cicDataText}
-                onChange={this.handleCicDataTextAreaChange}
+                tabSize={2}
+                showPrintMargin={false}
+                width="100%"
+                height="100%"
+                ref={e => { this.aceEditor = e; }}
+                onChange={this.handleAceEditorChange}
               />
             </TabPane>
             <TabPane tabId="view" className="py-3">
