@@ -126,7 +126,7 @@ export default class EditorModal extends React.Component {
     const { activeTab, cicDataText } = this.state;
 
     return (
-      <Modal isOpen={open} id="cic_data_modal">
+      <Modal isOpen={open} id="cic_data_modal" fade={false}>
         <ModalBody>
           <Nav tabs>
             <NavItem>
