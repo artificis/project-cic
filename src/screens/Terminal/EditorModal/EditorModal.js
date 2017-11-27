@@ -74,6 +74,7 @@ export default class EditorModal extends React.Component {
       this.switchTabTo('view');
     } catch (err) {
       if (err instanceof SyntaxError) {
+        this.aceEditor.editor.focus();
         alert('Invalid JSON data');
       }
     }
@@ -114,6 +115,7 @@ export default class EditorModal extends React.Component {
                 showPrintMargin={false}
                 width="100%"
                 height="100%"
+                wrapEnabled
                 ref={e => { this.aceEditor = e; }}
                 onChange={this.handleAceEditorChange}
               />
