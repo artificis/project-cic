@@ -16,9 +16,11 @@ export function withCommonErrorHandling(
     } catch (err) {
       if (err.name === 'StatusCodeError') {
         if (errHandlers[err.statusCode]) {
-          errHandlers[err.statusCode](dispatch);
+          errHandlers[err.statusCode](dispatch, err);
         } else if (err.statusCode === 401) {
           dispatch(log('Error: access token is invalid or expired. Please sign out and sign in again.'));
+        } else {
+          dispatch(log(err.message));
         }
       } else if (typeof err.getBody === 'function') {
         dispatch(log(`Error: ${JSON.stringify(err.getBody())}`));

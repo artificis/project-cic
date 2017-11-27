@@ -17,7 +17,11 @@ const newFileLogic = createLogic({
     if (closeModalAfterSave) {
       dispatch(closeModal());
     }
-  }, {}, {
+  }, {
+    400: (dispatch, err) => {
+      dispatch(log(err.error.message));
+    }
+  }, {
     callSetTerminalBusy: false
   })
 });
