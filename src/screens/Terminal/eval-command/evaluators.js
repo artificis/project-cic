@@ -1,6 +1,7 @@
 import { createStructuredSelector } from 'reselect';
 import store from 'store';
 import { GITLAB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
+import { setTerminalBusy } from 'services/terminal';
 import {
   projectsSelector,
   currentProjectSelector,
@@ -10,7 +11,8 @@ import {
   setCurrentProject,
   getRepositoryTree,
   setRepositoryTree,
-  setCurrentRepositoryPath
+  setCurrentRepositoryPath,
+  createFile
 } from 'services/repo';
 import { command, requiresAuth } from './decorators';
 
@@ -125,12 +127,54 @@ class Command {
   }
 
   @command()
+  @requiresAuth
   static pwd({ log }) {
     const { currentProject, currentRepoPath } = state();
     const pathItems = [];
     if (currentProject) pathItems.push(currentProject.path);
     if (currentRepoPath !== '') pathItems.push(currentRepoPath);
     log(`/${pathItems.join('/')}`);
+    return true;
+  }
+
+  @command('new')
+  @requiresAuth
+  static newFile({ args, log }) {
+    const { currentProject, currentRepoPath } = state();
+    if (args.length === 0) {
+      log('usage:');
+      log('new &lt;filename&gt;');
+    } else if (currentProject === null) {
+      log('You are currently not inside a project repository.');
+    } else {
+      const fileInput = document.createElement('input');
+      log('Please choose an image file.');
+      fileInput.type = 'file';
+      fileInput.accept = '.jpg,.jpeg,.png';
+      fileInput.onchange = () => {
+        if (fileInput.files.length > 0) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            log('Image file read.');
+            const imageData = atob(reader.result.split(',')[1]);
+            dispatch(createFile({
+              projectId: currentProject.id,
+              filePath: encodeURIComponent(`${currentRepoPath}/${args[0]}`),
+              branch: currentProject.defaultBranch || 'master',
+              options: {
+                content: btoa(`${imageData}PROJECT-CIC${btoa(JSON.stringify({}))}`),
+                commit_message: 'Test commit',
+                encoding: 'base64'
+              }
+            }));
+          };
+          dispatch(setTerminalBusy(true));
+          log('Reading image file...');
+          reader.readAsDataURL(fileInput.files[0]);
+        }
+      };
+      fileInput.click();
+    }
     return true;
   }
 }

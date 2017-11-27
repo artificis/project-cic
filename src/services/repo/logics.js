@@ -1,7 +1,10 @@
 import { createLogic } from 'redux-logic';
 import { withCommonErrorHandling, gitlabApiClient } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
-import { GET_PROJECTS, GET_REPOSITORY_TREE, setProjects, setRepositoryTree } from 'services/repo';
+import {
+  GET_PROJECTS, GET_REPOSITORY_TREE, CREATE_FILE,
+  setProjects, setRepositoryTree
+} from 'services/repo';
 import { spitToTerminal as log } from 'services/terminal';
 
 const projectsLogic = createLogic({
@@ -47,7 +50,19 @@ const repositoryTreeLogic = createLogic({
   })
 });
 
+const newFileLogic = createLogic({
+  type: CREATE_FILE,
+  process: withCommonErrorHandling(async ({ getState, action: { payload } }, dispatch) => {
+    const api = gitlabApiClient(authTokenSelector(getState()));
+    dispatch(log('Creating a new file...'));
+    const { projectId, filePath, branch, options } = payload;
+    await api.projects.repository.createFile(projectId, filePath, branch, options);
+    dispatch(log('New file created.'));
+  })
+});
+
 export default [
   projectsLogic,
-  repositoryTreeLogic
+  repositoryTreeLogic,
+  newFileLogic
 ];
