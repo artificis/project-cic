@@ -146,31 +146,35 @@ class Command {
     } else if (currentProject === null) {
       log('You are currently not inside a project repository.');
     } else {
-      const fileInput = document.createElement('input');
-      log('Please choose an image file.');
-      fileInput.type = 'file';
-      fileInput.accept = '.jpg,.jpeg,.png';
-      fileInput.onchange = () => {
-        if (fileInput.files.length > 0) {
-          const reader = new FileReader();
-          reader.onload = () => {
-            const imageBlob = atob(reader.result.split(',')[1]);
-            log('Image file read.');
-            log('Now in edit/view mode...');
-            dispatch(openModal({
-              imageBlob,
-              mode: 'create',
-              filePath: `${currentRepoPath}/${args[0]}`
-            }));
-          };
-          dispatch(setTerminalBusy(true));
-          log('Reading image file...');
-          reader.readAsDataURL(fileInput.files[0]);
-        }
-      };
-      fileInput.click();
+      this.openNewImageFileDialog(`${currentRepoPath}/${args[0]}`, log);
     }
     return true;
+  }
+
+  static openNewImageFileDialog(filePath, log) {
+    const fileInput = document.createElement('input');
+    log('Please choose an image file.');
+    fileInput.type = 'file';
+    fileInput.accept = '.jpg,.jpeg,.png';
+    fileInput.onchange = () => {
+      if (fileInput.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const imageBlob = atob(reader.result.split(',')[1]);
+          log('Image file read.');
+          log('Now in edit/view mode...');
+          dispatch(openModal({
+            imageBlob,
+            filePath,
+            mode: 'create'
+          }));
+        };
+        dispatch(setTerminalBusy(true));
+        log('Reading image file...');
+        reader.readAsDataURL(fileInput.files[0]);
+      }
+    };
+    fileInput.click();
   }
 }
 
