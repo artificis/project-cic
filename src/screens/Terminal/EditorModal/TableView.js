@@ -1,5 +1,6 @@
 import React from 'react';
 import shortid from 'shortid';
+import { markdown } from 'markdown';
 import { Table } from 'reactstrap';
 
 export default ({ data }) => (
@@ -18,11 +19,11 @@ export default ({ data }) => (
       <tbody>
         {data[category].map(row => (
           <tr key={shortid.generate()}>
-            <td>{row[0]}</td>
+            <td dangerouslySetInnerHTML={{ __html: markdown.toHTML(row[0]) }} />
             <td>{row[1]}</td>
             <td>{row[2]}</td>
             <td>{row[3]}</td>
-            <td>{row[4]}</td>
+            <td dangerouslySetInnerHTML={{ __html: markdown.toHTML(row[4]) }} />
           </tr>
         ))}
       </tbody>
