@@ -13,7 +13,6 @@ import {
   modalFilePathSelector,imageBlobSelector, cicDataSelector,
   closeModal, setCicData, createFile, updateFile
 } from 'services/modal';
-import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
 import { currentProjectSelector } from 'services/repo';
 import TableView from './TableView';
 
@@ -34,8 +33,6 @@ const mapStateToProps = createStructuredSelector({
 const mapDispatchToProps = {
   closeModal,
   setCicData,
-  log,
-  setTerminalBusy,
   createFile,
   updateFile
 };
@@ -119,10 +116,7 @@ export default class EditorModal extends React.Component {
 
   @autobind
   handleCloseClick() {
-    const { closeModal, log, setTerminalBusy } = this.props;
-    closeModal();
-    log('&nbsp;');
-    setTerminalBusy(false);
+    this.props.closeModal();
   }
 
   render() {

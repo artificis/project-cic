@@ -1,7 +1,7 @@
 import { createLogic } from 'redux-logic';
 import { withCommonErrorHandling, gitlabApiClient } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
-import { CREATE_FILE, UPDATE_FILE } from 'services/modal';
+import { CREATE_FILE, UPDATE_FILE, CLOSE_MODAL } from 'services/modal';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
 import { setModalMode, closeModal } from 'services/modal';
 
@@ -16,8 +16,6 @@ const newFileLogic = createLogic({
     dispatch(setModalMode('update'));
     if (closeModalAfterSave) {
       dispatch(closeModal());
-      dispatch(log('&nbsp;'));
-      dispatch(setTerminalBusy(false));
     }
   }, {}, {
     callSetTerminalBusy: false
@@ -34,15 +32,23 @@ const fileUpdateLogic = createLogic({
     dispatch(log('File updated.'));
     if (closeModalAfterSave) {
       dispatch(closeModal());
-      dispatch(log('&nbsp;'));
-      dispatch(setTerminalBusy(false));
     }
   }, {}, {
     callSetTerminalBusy: false
   })
 });
 
+const modalCloseLogic = createLogic({
+  type: CLOSE_MODAL,
+  process: (depObj, dispatch, done) => {
+    dispatch(log('Exiting from edit/view mode...'));
+    dispatch(log('&nbsp;'));
+    dispatch(setTerminalBusy(false));
+  }
+});
+
 export default [
   newFileLogic,
-  fileUpdateLogic
+  fileUpdateLogic,
+  modalCloseLogic
 ];
