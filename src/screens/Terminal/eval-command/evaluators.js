@@ -12,7 +12,7 @@ import {
   getRepositoryTree,
   setCurrentRepositoryPath
 } from 'services/repo';
-import { openModal } from 'services/modal';
+import { openModal, getFile } from 'services/modal';
 import { command, requiresAuth } from './decorators';
 
 const { getState, dispatch } = store;
@@ -162,7 +162,7 @@ class Command {
         reader.onload = () => {
           const imageBlob = atob(reader.result.split(',')[1]);
           log('Image file read.');
-          log('Now in edit/view mode...');
+          log('Entering edit/view mode...');
           dispatch(openModal({
             imageBlob,
             filePath,
@@ -175,6 +175,28 @@ class Command {
       }
     };
     fileInput.click();
+  }
+
+  @command()
+  @requiresAuth
+  static open({ args, log }) {
+    const { currentProject, currentRepoTree, currentRepoPath } = state();
+    if (args.length === 0) {
+      log('usage:');
+      log('open &lt;filename&gt;');
+    } else if (currentProject === null) {
+      log('You are currently not inside a project repository.');
+    } else if (currentRepoTree.find(e => e.name === args[0] && e.type !== 'tree')) {
+      dispatch(getFile({
+        projectId: currentProject.id,
+        filePath: `${currentRepoPath}/${args[0]}`,
+        branch: currentProject.defaultBranch
+      }));
+      return false;
+    } else {
+      log(`open: ${args[0]}: No such file`);
+    }
+    return true;
   }
 }
 

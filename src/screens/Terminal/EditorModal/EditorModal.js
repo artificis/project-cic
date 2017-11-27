@@ -20,6 +20,8 @@ import 'brace/mode/json';
 import 'brace/theme/solarized_light';
 import 'brace/ext/searchbox';
 
+const { REACT_APP_SEPARATOR_WORD } = process.env;
+
 const mapStateToProps = createStructuredSelector({
   open: modalOpenSelector,
   uiEnabled: modalUiEnabledSelector,
@@ -46,7 +48,7 @@ export default class EditorModal extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.open === false && nextProps.open === true) {
-      this.setState({ cicDataText: JSON.stringify(nextProps.cicData) });
+      this.setState({ cicDataText: JSON.stringify(nextProps.cicData, null, 2) });
     }
   }
 
@@ -101,7 +103,7 @@ export default class EditorModal extends React.Component {
         filePath: encodeURIComponent(filePath),
         branch: currentProject.defaultBranch || 'master',
         options: {
-          content: btoa(`${imageBlob}PROJECT-CIC${btoa(JSON.stringify(data))}`),
+          content: btoa(`${imageBlob}${REACT_APP_SEPARATOR_WORD}${btoa(JSON.stringify(data))}`),
           commit_message: 'Test commit',
           encoding: 'base64'
         }
