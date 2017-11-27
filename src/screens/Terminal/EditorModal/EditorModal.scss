@@ -9,6 +9,13 @@
   }
 }
 
-.cic-data-table caption {
-  caption-side: top;
+.cic-data-table {
+  caption {
+    caption-side: top;
+  }
+
+  thead th,
+  td {
+    vertical-align: middle;
+  }
 }
