@@ -30,7 +30,8 @@ const loginLogic = createLogic({
       dispatch(log('Oauth code verified.'));
       dispatch(log('Pulling user info...'));
       const api = gitlabApiClient(token.access_token);
-      dispatch(setCurrentUser(await api.users.current()));
+      const res = await api.users.current();
+      dispatch(setCurrentUser(res.body));
       dispatch(log('You are now signed in.'));
     } catch (err) {
       dispatch(log('Could not verify oauth code.'));
