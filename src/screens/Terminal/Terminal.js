@@ -12,6 +12,7 @@ import {
 } from 'services/terminal';
 import evalCommand from './eval-command';
 import EditorModal from './EditorModal';
+import appInfo from 'services/../../package.json';
 
 const promptSymbol = '313-AMT4-030>&nbsp;';
 
@@ -33,9 +34,13 @@ export default class Terminal extends React.Component {
   };
 
   componentDidMount() {
-    const qs = queryString.parse(this.props.location.search);
+    const { location, log } = this.props;
+    const qs = queryString.parse(location.search);
     if (Object.keys(qs).length > 0) {
       this.finishLogin(qs);
+    } else {
+      log(`Welcome to Project CIC (v${appInfo.version})`);
+      log('&nbsp;');
     }
   }
 
