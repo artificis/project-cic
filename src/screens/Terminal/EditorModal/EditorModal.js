@@ -15,6 +15,7 @@ import {
 } from 'services/modal';
 import { currentProjectSelector } from 'services/repo';
 import TableView from './TableView';
+import QrCodeModal from './QrCodeModal';
 
 import 'brace/mode/json';
 import 'brace/theme/solarized_light';
@@ -122,7 +123,7 @@ export default class EditorModal extends React.Component {
   }
 
   render() {
-    const { open, uiEnabled, cicData } = this.props;
+    const { open, uiEnabled } = this.props;
     const { activeTab, cicDataText } = this.state;
 
     return (
@@ -164,7 +165,8 @@ export default class EditorModal extends React.Component {
               />
             </TabPane>
             <TabPane tabId="view" className="py-3">
-              <TableView data={cicData} />
+              <TableView />
+              <QrCodeModal />
             </TabPane>
           </TabContent>
         </ModalBody>
