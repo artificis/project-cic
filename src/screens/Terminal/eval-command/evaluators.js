@@ -115,13 +115,13 @@ class Command {
     return true;
   }
 
-  static cdIntoProject(path, log) {
+  static cdIntoProject(name, log) {
     const { projects } = state();
-    const project = projects.find(p => p.path === path);
+    const project = projects.find(p => p.name === name);
     if (project) {
       dispatch(setCurrentProject(project));
     } else {
-      log(`cd: no such project: ${path}`);
+      log(`cd: no such project: ${name}`);
     }
     return true;
   }
@@ -142,7 +142,7 @@ class Command {
   static pwd({ log }) {
     const { currentProject, currentRepoPath } = state();
     const pathItems = [];
-    if (currentProject) pathItems.push(currentProject.path);
+    if (currentProject) pathItems.push(currentProject.name);
     if (currentRepoPath !== '') pathItems.push(currentRepoPath);
     log(`/${pathItems.join('/')}`);
     return true;
