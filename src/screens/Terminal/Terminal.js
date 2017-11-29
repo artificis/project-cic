@@ -94,31 +94,51 @@ export default class Terminal extends React.Component {
 
   @autobind
   async handleKeyDown({ keyCode, ctrlKey, altKey, metaKey, shiftKey }) {
-    if (keyCode === 13 && !ctrlKey && !altKey && !metaKey && !shiftKey) {
-      const { inputValue } = this.state;
-      const { log, setTerminalBusy, valuePromptMode, resetTerminalValuePromptMode } = this.props;
+    if (keyCode === 0x0d && !ctrlKey && !altKey && !metaKey && !shiftKey) {
+      this.onPressEnter();
+    } else if (keyCode === 0x43 && ctrlKey && !metaKey) {
+      this.onPressCancel();
+    }
+  }
 
-      this.setState({ inputValue: '' });
+  onPressEnter() {
+    const { inputValue } = this.state;
+    const { valuePromptMode, log, setTerminalBusy, resetTerminalValuePromptMode } = this.props;
 
-      if (valuePromptMode.on) {
-        const valueDisplayText = valuePromptMode.passwordMode ? '' : inputValue.replace(/ /g, '&nbsp;');
-        log(`${valuePromptMode.promptLabel}${valueDisplayText}`);
-        resetTerminalValuePromptMode();
-        if (typeof valuePromptMode.onConfirm === 'function') {
-          valuePromptMode.onConfirm(inputValue);
-        }
-      } else {
-        const input = inputValue.trim();
-        log(`${commandPromptSymbol}${inputValue.replace(/ /g, '&nbsp;')}`);
-        if (input !== '') {
-          setTerminalBusy(true);
-          if (evalCommand(input, log)) {
-            setTerminalBusy(false);
-            log('&nbsp;');
-          }
+    this.setState({ inputValue: '' });
+
+    if (valuePromptMode.on) {
+      const valueDisplayText = valuePromptMode.passwordMode ? '' : inputValue.replace(/ /g, '&nbsp;');
+      log(`${valuePromptMode.promptLabel}${valueDisplayText}`);
+      resetTerminalValuePromptMode();
+      if (typeof valuePromptMode.onConfirm === 'function') {
+        valuePromptMode.onConfirm(inputValue);
+      }
+    } else {
+      const input = inputValue.trim();
+      log(`${commandPromptSymbol}${inputValue.replace(/ /g, '&nbsp;')}`);
+      if (input !== '') {
+        setTerminalBusy(true);
+        if (evalCommand(input, log)) {
+          log('&nbsp;');
+          setTerminalBusy(false);
         }
       }
     }
+  }
+
+  onPressCancel() {
+    const { inputValue } = this.state;
+    const { valuePromptMode, log, setTerminalBusy, resetTerminalValuePromptMode } = this.props;
+
+    this.setState({ inputValue: '' });
+    const frozenText = valuePromptMode.on
+      ? `${valuePromptMode.promptLabel}${valuePromptMode.passwordMode ? '' : inputValue.replace(/ /g, '&nbsp;')}`
+      : `${commandPromptSymbol}${inputValue.replace(/ /g, '&nbsp;')}`;
+    log(`${frozenText}^C`);
+    log('&nbsp;');
+    setTerminalBusy(false);
+    resetTerminalValuePromptMode();
   }
 
   render() {
