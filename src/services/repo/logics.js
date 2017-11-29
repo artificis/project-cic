@@ -14,7 +14,7 @@ const projectsLogic = createLogic({
     const client = new GitHubApiClient(authTokenSelector(getState()));
     dispatch(log('Pulling projects...'));
     const repositories = await client.repositories();
-    
+
     dispatch(log('&nbsp;'));
     dispatch(setProjects(repositories));
     for (let repository of repositories) {
@@ -32,7 +32,7 @@ const repositoryTreeLogic = createLogic({
     const entries = await client.treeEntries(repoName, repoTreePath);
 
     if (entries.length === 0) {
-      return dispatch(log('The repository for this project is empty.'));
+      return dispatch(log('The repository for this project is empty'));
     }
 
     dispatch(log('&nbsp;'));

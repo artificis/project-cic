@@ -87,7 +87,8 @@ export default class EditorModal extends React.Component {
   @autobind
   handleSaveClick(closeModalAfterSave = false) {
     const {
-      mode, filePath, imageBlob, cicData, currentProject,
+      mode, filePath, imageBlob, cicData,
+      currentProject: { resourcePath: repoResourcePath },
       setCicData, createFile, updateFile
     } = this.props;
     const { activeTab, cicDataText } = this.state;
@@ -100,13 +101,11 @@ export default class EditorModal extends React.Component {
       }
       saveFile({
         closeModalAfterSave,
-        projectId: currentProject.id,
-        filePath: encodeURIComponent(filePath),
-        branch: currentProject.defaultBranch || 'master',
+        repoResourcePath,
+        filePath,
         options: {
           content: btoa(`${imageBlob}${REACT_APP_SEPARATOR_WORD}${btoa(JSON.stringify(data))}`),
-          commit_message: 'Test commit',
-          encoding: 'base64'
+          message: 'Test commit'
         }
       });
     } catch (err) {

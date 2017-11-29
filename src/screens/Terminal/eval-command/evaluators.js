@@ -17,6 +17,7 @@ import { command, requiresAuth } from './decorators';
 
 const { getState, dispatch } = store;
 const state = () => selector(getState());
+const joinPath = (...parts) => parts.join('/').replace(/^\//, '');
 const selector = createStructuredSelector({
   loggedIn: authenticatedSelector,
   user: currentUserSelector,
@@ -130,7 +131,7 @@ class Command {
     const { currentRepoTree, currentRepoPath } = state();
     const folder = currentRepoTree.find(e => e.name === folderName && e.type === 'tree');
     if (folder) {
-      dispatch(setCurrentRepositoryPath([currentRepoPath, folder.name].join('/').replace(/^\//, '')));
+      dispatch(setCurrentRepositoryPath(joinPath(currentRepoPath, folder.name)));
     } else {
       log(`cd: no such directory: ${folderName}`);
     }
@@ -156,16 +157,23 @@ class Command {
       log('usage:');
       log('new &lt;filename&gt;');
     } else if (currentProject === null) {
-      log('You are currently not inside a project repository.');
+      log('You are currently not inside a project repository');
+    } else if (this.fileExists(args[0])) {
+      log(`new: file already exists: ${args[0]}`);
     } else {
-      this.openNewImageFileDialog(`${currentRepoPath}/${args[0]}`, log);
+      this.openNewImageFileDialog(joinPath(currentRepoPath, args[0]), log);
     }
     return true;
   }
 
+  static fileExists(fileName) {
+    const { currentRepoTree } = state();
+    return currentRepoTree.find(e => e.name === fileName);
+  }
+
   static openNewImageFileDialog(filePath, log) {
     const fileInput = document.createElement('input');
-    log('Please choose an image file.');
+    log('Please choose an image file');
     fileInput.type = 'file';
     fileInput.accept = '.jpg,.jpeg,.png';
     fileInput.onchange = () => {
@@ -173,7 +181,7 @@ class Command {
         const reader = new FileReader();
         reader.onload = () => {
           const imageBlob = atob(reader.result.split(',')[1]);
-          log('Image file read.');
+          log('Image file read');
           log('Entering edit/view mode...');
           dispatch(openModal({
             imageBlob,

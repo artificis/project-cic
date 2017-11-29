@@ -1,4 +1,5 @@
 import { createLogic } from 'redux-logic';
+import GitHubApiClient from 'services/GitHubApiClient';
 import { withCommonErrorHandling, gitlabApiClient } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
 import { CREATE_FILE, UPDATE_FILE, GET_FILE, CLOSE_MODAL } from 'services/modal';
@@ -8,12 +9,14 @@ import { openModal, closeModal, setModalMode, setCicData } from 'services/modal'
 const newFileLogic = createLogic({
   type: CREATE_FILE,
   process: withCommonErrorHandling(async ({ getState, action: { payload } }, dispatch) => {
-    const api = gitlabApiClient(authTokenSelector(getState()));
+    const client = new GitHubApiClient(authTokenSelector(getState()));
     dispatch(log('Creating a new file...'));
-    const { closeModalAfterSave, projectId, filePath, branch, options } = payload;
-    await api.projects.repository.createFile(projectId, filePath, branch, options);
-    dispatch(log('New file created.'));
+    const { closeModalAfterSave, repoResourcePath, filePath, options } = payload;
+
+    await client.createFile(repoResourcePath, filePath, options);
+    dispatch(log('New file created'));
     dispatch(setModalMode('update'));
+
     if (closeModalAfterSave) {
       dispatch(closeModal());
     }

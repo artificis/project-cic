@@ -1,6 +1,7 @@
 import requestify from 'requestify';
 
 const GRAPHQL_ENDPOINT = 'https://api.github.com/graphql';
+const API_V3_ROOT_ENDPOINT = 'https://api.github.com';
 const limitFieldsTo = function(...fields) {
   return node => fields.reduce((a, field) => ({ ...a, [field]: node[field] }), {});
 };
@@ -17,6 +18,14 @@ export default class GitHubApiClient {
   async requestGraphQlQuery(query, variables = {}) {
     const response = await requestify.post(GRAPHQL_ENDPOINT, { query, variables }, this.reqOptions);
     return response.getBody().data;
+  }
+
+  requestApiV3(method, relativeUri, body = {}) {
+    return requestify.request([API_V3_ROOT_ENDPOINT, relativeUri].join(''), {
+      ...this.reqOptions,
+      method,
+      body
+    });
   }
 
   async currentUser() {
@@ -44,6 +53,7 @@ export default class GitHubApiClient {
             repositories(isFork: false, first: 50, orderBy: { field: NAME, direction: ASC }, after: $endCursor) {
               nodes {
                 name
+                resourcePath
                 isPrivate
                 owner {
                   login
@@ -58,7 +68,11 @@ export default class GitHubApiClient {
         }
       `, { endCursor });
       ({ login, repositories: { nodes, pageInfo: { endCursor, hasNextPage } } } = data.viewer);
-      allNodes.push(...nodes.filter(ownedByMeAndNotPrivate).map(limitFieldsTo('name')));
+      allNodes.push(
+        ...nodes
+          .filter(ownedByMeAndNotPrivate)
+          .map(limitFieldsTo('name', 'resourcePath'))
+      );
     } while (hasNextPage);
 
     return allNodes;
@@ -86,5 +100,9 @@ export default class GitHubApiClient {
     });
     const { object } = data.viewer.repository;
     return object && object.entries ? object.entries : [];
+  }
+
+  createFile(repoResourcePath, filePath, options) {
+    return this.requestApiV3('PUT', `/repos${repoResourcePath}/contents/${filePath}`, options);
   }
 }
