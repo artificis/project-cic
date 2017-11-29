@@ -1,8 +1,5 @@
-import getGitLabApiClient from 'node-gitlab-api';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
 import { setModalUiEnabled } from 'services/modal';
-
-export const gitlabApiClient = oauthToken => getGitLabApiClient({ oauthToken });
 
 export function withCommonErrorHandling(
   processFunc,
