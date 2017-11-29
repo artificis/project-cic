@@ -1,7 +1,7 @@
 import { createLogic } from 'redux-logic';
 import requestify from 'requestify';
 import { history } from 'store';
-import { gitlabApiClient } from 'services/utils';
+import GitHubApiClient from 'services/GitHubApiClient';
 import { GET_ACCESS_TOKEN, setOauthToken, setCurrentUser } from 'services/auth';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
 
@@ -22,10 +22,9 @@ const loginLogic = createLogic({
         dispatch(setOauthToken(token));
         dispatch(log('OAuth code verified'));
         dispatch(log('Pulling user info...'));
-        // const api = gitlabApiClient(token.access_token);
-        // const res = await api.users.current();
-        // dispatch(setCurrentUser(res.body));
-        // dispatch(log('You are now signed in.'));
+        const client = new GitHubApiClient(token);
+        dispatch(setCurrentUser(await client.currentUser()));
+        dispatch(log('You are now signed in.'));
       }
     } catch (err) {
       dispatch(log('Could not verify OAuth code.'));

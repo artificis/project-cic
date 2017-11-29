@@ -58,7 +58,7 @@ class Command {
   @requiresAuth
   static whoami({ log }) {
     const { user } = state();
-    log(user.username);
+    log(user.login);
     return true;
   }
 
