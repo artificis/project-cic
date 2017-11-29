@@ -127,10 +127,10 @@ class Command {
   }
 
   static cdIntoRepositoryTree(folderName, log) {
-    const { currentRepoTree } = state();
+    const { currentRepoTree, currentRepoPath } = state();
     const folder = currentRepoTree.find(e => e.name === folderName && e.type === 'tree');
     if (folder) {
-      dispatch(setCurrentRepositoryPath(folder.path));
+      dispatch(setCurrentRepositoryPath([currentRepoPath, folder.name].join('/').replace(/^\//, '')));
     } else {
       log(`cd: no such directory: ${folderName}`);
     }
