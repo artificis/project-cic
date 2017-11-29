@@ -9,6 +9,7 @@ export const CLOSE_MODAL = 'CLOSE_MODAL';
 export const CREATE_FILE = 'CREATE_FILE';
 export const UPDATE_FILE = 'UPDATE_FILE';
 export const GET_FILE_CONTENT = 'GET_FILE_CONTENT';
+export const SET_MASTER_KEY = 'SET_MASTER_KEY';
 
 // action creators
 export const openModal = createAction(OPEN_MODAL);
@@ -19,6 +20,7 @@ export const closeModal = createAction(CLOSE_MODAL);
 export const createFile = createAction(CREATE_FILE);
 export const updateFile = createAction(UPDATE_FILE);
 export const getFileContent = createAction(GET_FILE_CONTENT);
+export const setMasterKey = createAction(SET_MASTER_KEY);
 
 // reducer
 const initialState = {
@@ -28,7 +30,8 @@ const initialState = {
   filePath: null,
   imageBlob: null,
   cicData: {},
-  fileShaValue: null
+  fileShaValue: null,
+  masterKey: ''
 };
 
 export default handleActions({
@@ -53,6 +56,10 @@ export default handleActions({
     ...state,
     cicData: payload
   }),
+  [SET_MASTER_KEY]: (state, { payload }) => ({
+    ...state,
+    masterKey: payload
+  }),
   [CLOSE_MODAL]: state => ({
     ...state,
     open: false,
@@ -70,6 +77,7 @@ export const modalFilePathSelector = state => state.modal.filePath;
 export const imageBlobSelector = state => state.modal.imageBlob;
 export const cicDataSelector = state => state.modal.cicData;
 export const modalFileShaValueSelector = state => state.modal.fileShaValue;
+export const masterKeySelector = state => state.modal.masterKey;
 
 // logics
 export const logics = require('./logics').default;

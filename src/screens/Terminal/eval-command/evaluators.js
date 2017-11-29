@@ -1,7 +1,7 @@
 import { createStructuredSelector } from 'reselect';
 import store from 'store';
 import { GITHUB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
-import { setTerminalBusy } from 'services/terminal';
+import { setTerminalBusy, setTerminalValuePromptMode } from 'services/terminal';
 import {
   repositoriesSelector,
   currentRepositorySelector,
@@ -12,7 +12,7 @@ import {
   getRepositoryTree,
   setCurrentRepositoryPath
 } from 'services/repo';
-import { openModal, getFileContent } from 'services/modal';
+import { openModal, getFileContent, setMasterKey } from 'services/modal';
 import { command, requiresAuth } from './decorators';
 
 const { getState, dispatch } = store;
@@ -161,7 +161,8 @@ class Command {
     } else if (this.fileExists(args[0])) {
       log(`new: file already exists: ${args[0]}`);
     } else {
-      this.openNewImageFileDialog(joinPath(currentRepoPath, args[0]), log);
+      this.promptToCreateMasterKey(joinPath(currentRepoPath, args[0]), log);
+      return false;
     }
     return true;
   }
@@ -169,6 +170,29 @@ class Command {
   static fileExists(fileName) {
     const { currentRepoTree } = state();
     return currentRepoTree.find(e => e.name === fileName);
+  }
+
+  static promptToCreateMasterKey(filePath, log) {
+    dispatch(setTerminalValuePromptMode({
+      passwordMode: true,
+      promptLabel: 'Set master password:&nbsp;',
+      onConfirm: masterKey => {
+        dispatch(setTerminalValuePromptMode({
+          passwordMode: true,
+          promptLabel: 'Enter same master password again:&nbsp;',
+          onConfirm: masterKeyConfirmation => {
+            if (masterKey === masterKeyConfirmation) {
+              dispatch(setMasterKey(masterKey));
+              dispatch(setTerminalBusy(false));
+              this.openNewImageFileDialog(filePath, log);
+            } else {
+              log('Master passwords do not match. Try again.');
+              this.promptToCreateMasterKey(filePath, log);
+            }
+          }
+        }));
+      }
+    }));
   }
 
   static openNewImageFileDialog(filePath, log) {
@@ -208,9 +232,17 @@ class Command {
     } else if (currentRepository === null) {
       log('open: you are currently not inside a repository');
     } else if (currentRepoTree.find(e => e.name === args[0] && e.type !== 'tree')) {
-      dispatch(getFileContent({
-        repoResourcePath: currentRepository.resourcePath,
-        filePath: joinPath(currentRepoPath, args[0])
+      dispatch(setTerminalValuePromptMode({
+        passwordMode: true,
+        promptLabel: 'Enter master password:&nbsp;',
+        onConfirm: masterKey => {
+          dispatch(setMasterKey(masterKey));
+          dispatch(getFileContent({
+            masterKey,
+            repoResourcePath: currentRepository.resourcePath,
+            filePath: joinPath(currentRepoPath, args[0])
+          }));
+        }
       }));
       return false;
     } else {

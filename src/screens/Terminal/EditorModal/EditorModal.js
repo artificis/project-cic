@@ -9,19 +9,18 @@ import {
 } from 'reactstrap';
 import classnames from 'classnames';
 import {
-  modalOpenSelector, modalUiEnabledSelector, modalModeSelector,
+  modalOpenSelector, modalUiEnabledSelector, modalModeSelector, masterKeySelector,
   modalFilePathSelector, imageBlobSelector, cicDataSelector, modalFileShaValueSelector,
   closeModal, setCicData, createFile, updateFile
 } from 'services/modal';
 import { currentRepositorySelector } from 'services/repo';
+import { generateFileContent } from 'services/utils';
 import TableView from './TableView';
 import QrCodeModal from './QrCodeModal';
 
 import 'brace/mode/json';
 import 'brace/theme/solarized_light';
 import 'brace/ext/searchbox';
-
-const { REACT_APP_SEPARATOR_WORD } = process.env;
 
 const mapStateToProps = createStructuredSelector({
   open: modalOpenSelector,
@@ -31,6 +30,7 @@ const mapStateToProps = createStructuredSelector({
   imageBlob: imageBlobSelector,
   cicData: cicDataSelector,
   fileShaValue: modalFileShaValueSelector,
+  masterKey: masterKeySelector,
   currentRepository: currentRepositorySelector
 });
 
@@ -88,7 +88,7 @@ export default class EditorModal extends React.Component {
   @autobind
   handleSaveClick(closeModalAfterSave = false) {
     const {
-      mode, filePath, imageBlob, cicData, fileShaValue,
+      mode, filePath, imageBlob, cicData, fileShaValue, masterKey,
       currentRepository: { resourcePath: repoResourcePath },
       setCicData, createFile, updateFile
     } = this.props;
@@ -108,7 +108,7 @@ export default class EditorModal extends React.Component {
         filePath,
         options: {
           ...extraOptions,
-          content: btoa(`${imageBlob}${REACT_APP_SEPARATOR_WORD}${btoa(JSON.stringify(data))}`),
+          content: generateFileContent(imageBlob, data, masterKey),
           message: 'Test commit'
         }
       });

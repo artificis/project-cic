@@ -1,6 +1,6 @@
 import { createLogic } from 'redux-logic';
 import GitHubApiClient from 'services/GitHubApiClient';
-import { withCommonErrorHandling } from 'services/utils';
+import { withCommonErrorHandling, parseFileContent } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
 import { CREATE_FILE, UPDATE_FILE, GET_FILE_CONTENT, CLOSE_MODAL } from 'services/modal';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
@@ -48,16 +48,16 @@ const fileReadLogic = createLogic({
   process: withCommonErrorHandling(async ({ getState, action: { payload } }, dispatch) => {
     const client = new GitHubApiClient(authTokenSelector(getState()));
     dispatch(log('Pulling file...'));
-    const { repoResourcePath, filePath } = payload;
+    const { repoResourcePath, filePath, masterKey } = payload;
     const body = (await client.getFileContent(repoResourcePath, filePath)).getBody();
-    let [imageBlob, cicData] = atob(body.content).split(process.env.REACT_APP_SEPARATOR_WORD);
+    const [imageBlob, cicData] = parseFileContent(body.content, masterKey);
 
     if (cicData) {
-      dispatch(setCicData(JSON.parse(atob(cicData))));
+      dispatch(setCicData(cicData));
       dispatch(log('Entering edit/view mode...'));
       dispatch(openModal({ imageBlob, filePath, fileShaValue: body.sha, mode: 'update' }));
     } else {
-      dispatch(log(`open: not a valid CIC file: ${body.name}`));
+      dispatch(log(`open: not a valid CIC file or incorrect master key: ${body.name}`));
       dispatch(log('&nbsp;'));
       dispatch(setTerminalBusy(false));
     }
