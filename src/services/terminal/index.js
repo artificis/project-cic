@@ -27,7 +27,7 @@ const initialState = {
 export default handleActions({
   [SPIT_TO_TERMINAL]: (state, { payload }) => ({
     ...state,
-    logs: state.logs.concat(payload)
+    logs: state.logs.concat(payload).slice(-parseInt(process.env.REACT_APP_SCROLLBACK_LINES, 10))
   }),
   [SET_TERMINAL_BUSY_STATE]: (state, { payload }) => ({
     ...state,
