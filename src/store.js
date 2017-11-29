@@ -1,6 +1,6 @@
 import { createStore, compose, applyMiddleware } from 'redux';
 import { routerMiddleware } from 'react-router-redux';
-import createHistory from 'history/createBrowserHistory';
+import createHistory from 'history/createHashHistory';
 import { createLogicMiddleware } from 'redux-logic';
 import reducers from 'services/reducers';
 import logics from 'services/logics';
