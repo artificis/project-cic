@@ -109,7 +109,7 @@ export default class EditorModal extends React.Component {
         options: {
           ...extraOptions,
           content: generateFileContent(imageBlob, data, masterKey),
-          message: 'Test commit'
+          message: 'Update CIC data'
         }
       });
     } catch (err) {
