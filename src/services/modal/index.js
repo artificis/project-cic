@@ -27,17 +27,19 @@ const initialState = {
   mode: 'create',
   filePath: null,
   imageBlob: null,
-  cicData: {}
+  cicData: {},
+  fileShaValue: null
 };
 
 export default handleActions({
-  [OPEN_MODAL]: (state, { payload }) => ({
+  [OPEN_MODAL]: (state, { payload: { mode, filePath, imageBlob, fileShaValue } }) => ({
     ...state,
+    mode,
+    filePath,
+    imageBlob,
+    fileShaValue,
     open: true,
-    uiEnabled: true,
-    mode: payload.mode,
-    filePath: payload.filePath,
-    imageBlob: payload.imageBlob
+    uiEnabled: true
   }),
   [SET_MODAL_UI_ENABLED]: (state, { payload }) => ({
     ...state,
@@ -67,6 +69,7 @@ export const modalModeSelector = state => state.modal.mode;
 export const modalFilePathSelector = state => state.modal.filePath;
 export const imageBlobSelector = state => state.modal.imageBlob;
 export const cicDataSelector = state => state.modal.cicData;
+export const modalFileShaValueSelector = state => state.modal.fileShaValue;
 
 // logics
 export const logics = require('./logics').default;

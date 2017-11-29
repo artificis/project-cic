@@ -1,6 +1,6 @@
 import { createLogic } from 'redux-logic';
 import GitHubApiClient from 'services/GitHubApiClient';
-import { withCommonErrorHandling, gitlabApiClient } from 'services/utils';
+import { withCommonErrorHandling } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
 import { CREATE_FILE, UPDATE_FILE, GET_FILE_CONTENT, CLOSE_MODAL } from 'services/modal';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
@@ -20,11 +20,7 @@ const newFileLogic = createLogic({
     if (closeModalAfterSave) {
       dispatch(closeModal());
     }
-  }, {
-    400: (dispatch, err) => {
-      dispatch(log(err.error.message));
-    }
-  }, {
+  }, {}, {
     callSetTerminalBusy: false
   })
 });
@@ -32,11 +28,13 @@ const newFileLogic = createLogic({
 const fileUpdateLogic = createLogic({
   type: UPDATE_FILE,
   process: withCommonErrorHandling(async ({ getState, action: { payload } }, dispatch) => {
-    const api = gitlabApiClient(authTokenSelector(getState()));
+    const client = new GitHubApiClient(authTokenSelector(getState()));
     dispatch(log('Updating file...'));
-    const { closeModalAfterSave, projectId, filePath, branch, options } = payload;
-    await api.projects.repository.updateFile(projectId, filePath, branch, options);
-    dispatch(log('File updated.'));
+    const { closeModalAfterSave, repoResourcePath, filePath, options } = payload;
+
+    await client.updateFile(repoResourcePath, filePath, options);
+    dispatch(log('File updated'));
+
     if (closeModalAfterSave) {
       dispatch(closeModal());
     }
@@ -57,7 +55,7 @@ const fileReadLogic = createLogic({
     if (cicData) {
       dispatch(setCicData(JSON.parse(atob(cicData))));
       dispatch(log('Entering edit/view mode...'));
-      dispatch(openModal({ imageBlob, filePath, mode: 'update' }));
+      dispatch(openModal({ imageBlob, filePath, fileShaValue: body.sha, mode: 'update' }));
     } else {
       dispatch(log(`open: not a valid CIC file: ${body.name}`));
       dispatch(log('&nbsp;'));

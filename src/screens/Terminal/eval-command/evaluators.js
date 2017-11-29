@@ -186,6 +186,7 @@ class Command {
           dispatch(openModal({
             imageBlob,
             filePath,
+            fileShaValue: null,
             mode: 'create'
           }));
         };

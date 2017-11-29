@@ -10,7 +10,7 @@ import {
 import classnames from 'classnames';
 import {
   modalOpenSelector, modalUiEnabledSelector, modalModeSelector,
-  modalFilePathSelector,imageBlobSelector, cicDataSelector,
+  modalFilePathSelector, imageBlobSelector, cicDataSelector, modalFileShaValueSelector,
   closeModal, setCicData, createFile, updateFile
 } from 'services/modal';
 import { currentProjectSelector } from 'services/repo';
@@ -30,6 +30,7 @@ const mapStateToProps = createStructuredSelector({
   filePath: modalFilePathSelector,
   imageBlob: imageBlobSelector,
   cicData: cicDataSelector,
+  fileShaValue: modalFileShaValueSelector,
   currentProject: currentProjectSelector
 });
 
@@ -87,12 +88,14 @@ export default class EditorModal extends React.Component {
   @autobind
   handleSaveClick(closeModalAfterSave = false) {
     const {
-      mode, filePath, imageBlob, cicData,
+      mode, filePath, imageBlob, cicData, fileShaValue,
       currentProject: { resourcePath: repoResourcePath },
       setCicData, createFile, updateFile
     } = this.props;
     const { activeTab, cicDataText } = this.state;
     const saveFile = mode === 'create' ? createFile : updateFile;
+    const extraOptions = mode === 'update' ? { sha: fileShaValue } : {};
+
     try {
       let data = cicData;
       if (activeTab === 'edit') {
@@ -104,6 +107,7 @@ export default class EditorModal extends React.Component {
         repoResourcePath,
         filePath,
         options: {
+          ...extraOptions,
           content: btoa(`${imageBlob}${REACT_APP_SEPARATOR_WORD}${btoa(JSON.stringify(data))}`),
           message: 'Test commit'
         }

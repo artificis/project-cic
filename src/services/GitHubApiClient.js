@@ -109,4 +109,8 @@ export default class GitHubApiClient {
   getFileContent(repoResourcePath, filePath) {
     return this.requestApiV3('GET', `/repos${repoResourcePath}/contents/${filePath}`);
   }
+
+  updateFile(...args) {
+    return this.createFile(...args);
+  }
 }
