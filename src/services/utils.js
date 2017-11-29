@@ -1,8 +1,9 @@
-import getGitLabApiClient from 'node-gitlab-api';
+import sjcl from 'sjcl';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
 import { setModalUiEnabled } from 'services/modal';
 
-export const gitlabApiClient = oauthToken => getGitLabApiClient({ oauthToken });
+const { REACT_APP_SEPARATOR_WORD } = process.env;
+const { atob, btoa } = window;
 
 export function withCommonErrorHandling(
   processFunc,
@@ -17,8 +18,6 @@ export function withCommonErrorHandling(
       if (err.name === 'StatusCodeError') {
         if (errHandlers[err.statusCode]) {
           errHandlers[err.statusCode](dispatch, err);
-        } else if (err.statusCode === 401) {
-          dispatch(log('Error: access token is invalid or expired. Please sign out and sign in again.'));
         } else {
           dispatch(log(err.message));
         }
@@ -37,3 +36,25 @@ export function withCommonErrorHandling(
     }
   }
 };
+
+export function generateFileContent(imageBlob, cicData, masterKey) {
+  const encryptedData = sjcl.encrypt(masterKey, btoa(JSON.stringify(cicData)));
+  return btoa(`${imageBlob}${REACT_APP_SEPARATOR_WORD}${btoa(encryptedData)}`);
+}
+
+export function parseFileContent(content, masterKey) {
+  let cicData;
+  const [imageBlob, encryptedData] = atob(content).split(REACT_APP_SEPARATOR_WORD);
+
+  if (encryptedData) {
+    try {
+      cicData = JSON.parse(atob(sjcl.decrypt(masterKey, atob(encryptedData))));
+    } catch (err) {
+      cicData = null;
+    }
+  } else {
+    cicData = null;
+  }
+  
+  return [imageBlob, cicData];
+}

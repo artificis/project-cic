@@ -1,27 +1,28 @@
 import { createStructuredSelector } from 'reselect';
 import store from 'store';
-import { GITLAB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
-import { setTerminalBusy } from 'services/terminal';
+import { GITHUB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
+import { setTerminalBusy, setTerminalValuePromptMode } from 'services/terminal';
 import {
-  projectsSelector,
-  currentProjectSelector,
+  repositoriesSelector,
+  currentRepositorySelector,
   currentRepositoryTreeSelector,
   currentRepositoryPathSelector,
-  getProjects,
-  setCurrentProject,
+  getRepositories,
+  setCurrentRepository,
   getRepositoryTree,
   setCurrentRepositoryPath
 } from 'services/repo';
-import { openModal, getFile } from 'services/modal';
+import { openModal, getFileContent, setMasterKey } from 'services/modal';
 import { command, requiresAuth } from './decorators';
 
 const { getState, dispatch } = store;
 const state = () => selector(getState());
+const joinPath = (...parts) => parts.join('/').replace(/^\//, '');
 const selector = createStructuredSelector({
   loggedIn: authenticatedSelector,
   user: currentUserSelector,
-  projects: projectsSelector,
-  currentProject: currentProjectSelector,
+  repositories: repositoriesSelector,
+  currentRepository: currentRepositorySelector,
   currentRepoTree: currentRepositoryTreeSelector,
   currentRepoPath: currentRepositoryPathSelector
 });
@@ -49,7 +50,7 @@ class Command {
       return true;
     } else {
       log('Signing in...');
-      setTimeout(() => window.location.assign(GITLAB_OAUTH_URL), 1000);
+      setTimeout(() => window.location.assign(GITHUB_OAUTH_URL), 1000);
       return false;
     }
   }
@@ -58,79 +59,79 @@ class Command {
   @requiresAuth
   static whoami({ log }) {
     const { user } = state();
-    log(user.username);
+    log(user.login);
     return true;
   }
 
-  @command('list projects or repository tree')
+  @command('list repositories or repository tree')
   @requiresAuth
   static ls() {
-    const { currentProject, currentRepoPath } = state();
-    if (currentProject) {
-      this.lsRepositoryTree(currentProject, currentRepoPath);
+    const { currentRepository, currentRepoPath } = state();
+    if (currentRepository) {
+      this.lsRepositoryTree(currentRepository, currentRepoPath);
     } else {
-      this.lsProjects();
+      this.lsRepositories();
     }
   }
 
-  static lsProjects() {
-    dispatch(getProjects());
+  static lsRepositories() {
+    dispatch(getRepositories());
   }
 
-  static lsRepositoryTree(currentProject, currentRepoPath) {
+  static lsRepositoryTree(currentRepository, currentRepoPath) {
     dispatch(getRepositoryTree({
-      projectId: currentProject.id,
+      repoName: currentRepository.name,
       repoTreePath: currentRepoPath
     }));
   }
 
-  @command('get into project or repository tree folder')
+  @command('get into repository or repository tree folder')
   @requiresAuth
   static cd({ args, log }) {
     if (args.length === 0) {
       return this.cdToRoot();
     } else if (args[0] === '..') {
       return this.cdUpwards();
-    } else if (state().currentProject) {
+    } else if (state().currentRepository) {
       return this.cdIntoRepositoryTree(args[0], log);
     } else {
-      return this.cdIntoProject(args[0], log);
+      return this.cdIntoRepository(args[0], log);
     }
   }
 
   static cdToRoot() {
-    dispatch(setCurrentProject(null));
+    dispatch(setCurrentRepository(null));
     return true;
   }
 
   static cdUpwards() {
-    const { currentProject, currentRepoPath } = state();
+    const { currentRepository, currentRepoPath } = state();
     if (currentRepoPath !== '') {
       const pathItems = currentRepoPath.split('/');
       pathItems.pop();
       dispatch(setCurrentRepositoryPath(pathItems.join('/')));
-    } else if (currentProject) {
+    } else if (currentRepository) {
       this.cdToRoot();
     }
     return true;
   }
 
-  static cdIntoProject(path, log) {
-    const { projects } = state();
-    const project = projects.find(p => p.path === path);
-    if (project) {
-      dispatch(setCurrentProject(project));
+  static cdIntoRepository(name, log) {
+    const { repositories } = state();
+    const repository = repositories.find(repo => repo.name === name);
+    if (repository) {
+      dispatch(setCurrentRepository(repository));
     } else {
-      log(`cd: no such project: ${path}`);
+      log(`cd: no such repository: ${name}`);
     }
     return true;
   }
 
   static cdIntoRepositoryTree(folderName, log) {
-    const { currentRepoTree } = state();
+    const { currentRepoTree, currentRepoPath } = state();
     const folder = currentRepoTree.find(e => e.name === folderName && e.type === 'tree');
     if (folder) {
-      dispatch(setCurrentRepositoryPath(folder.path));
+      dispatch(setCurrentRepositoryPath(joinPath(currentRepoPath, folder.name)));
     } else {
       log(`cd: no such directory: ${folderName}`);
     }
@@ -140,9 +141,9 @@ class Command {
   @command('print current working directory')
   @requiresAuth
   static pwd({ log }) {
-    const { currentProject, currentRepoPath } = state();
+    const { currentRepository, currentRepoPath } = state();
     const pathItems = [];
-    if (currentProject) pathItems.push(currentProject.path);
+    if (currentRepository) pathItems.push(currentRepository.name);
     if (currentRepoPath !== '') pathItems.push(currentRepoPath);
     log(`/${pathItems.join('/')}`);
     return true;
@@ -151,21 +152,52 @@ class Command {
   @command('prepare a new CIC file with specified image and open a modal', 'new')
   @requiresAuth
   static newFile({ args, log }) {
-    const { currentProject, currentRepoPath } = state();
+    const { currentRepository, currentRepoPath } = state();
     if (args.length === 0) {
       log('usage:');
       log('new &lt;filename&gt;');
-    } else if (currentProject === null) {
-      log('You are currently not inside a project repository.');
+    } else if (currentRepository === null) {
+      log('new: you are currently not inside a repository');
+    } else if (this.fileExists(args[0])) {
+      log(`new: file already exists: ${args[0]}`);
     } else {
-      this.openNewImageFileDialog(`${currentRepoPath}/${args[0]}`, log);
+      this.promptToCreateMasterKey(joinPath(currentRepoPath, args[0]), log);
+      return false;
     }
     return true;
   }
 
+  static fileExists(fileName) {
+    const { currentRepoTree } = state();
+    return currentRepoTree.find(e => e.name === fileName);
+  }
+
+  static promptToCreateMasterKey(filePath, log) {
+    dispatch(setTerminalValuePromptMode({
+      passwordMode: true,
+      promptLabel: 'Set master password:&nbsp;',
+      onConfirm: masterKey => {
+        dispatch(setTerminalValuePromptMode({
+          passwordMode: true,
+          promptLabel: 'Enter same master password again:&nbsp;',
+          onConfirm: masterKeyConfirmation => {
+            if (masterKey === masterKeyConfirmation) {
+              dispatch(setMasterKey(masterKey));
+              dispatch(setTerminalBusy(false));
+              this.openNewImageFileDialog(filePath, log);
+            } else {
+              log('Master passwords do not match. Try again.');
+              this.promptToCreateMasterKey(filePath, log);
+            }
+          }
+        }));
+      }
+    }));
+  }
+
   static openNewImageFileDialog(filePath, log) {
     const fileInput = document.createElement('input');
-    log('Please choose an image file.');
+    log('Please choose an image file');
     fileInput.type = 'file';
     fileInput.accept = '.jpg,.jpeg,.png';
     fileInput.onchange = () => {
@@ -173,11 +205,12 @@ class Command {
         const reader = new FileReader();
         reader.onload = () => {
           const imageBlob = atob(reader.result.split(',')[1]);
-          log('Image file read.');
+          log('Image file read');
           log('Entering edit/view mode...');
           dispatch(openModal({
             imageBlob,
             filePath,
+            fileShaValue: null,
             mode: 'create'
           }));
         };
@@ -192,21 +225,28 @@ class Command {
   @command('open an existing CIC file')
   @requiresAuth
   static open({ args, log }) {
-    const { currentProject, currentRepoTree, currentRepoPath } = state();
+    const { currentRepository, currentRepoTree, currentRepoPath } = state();
     if (args.length === 0) {
       log('usage:');
       log('open &lt;filename&gt;');
-    } else if (currentProject === null) {
-      log('You are currently not inside a project repository.');
+    } else if (currentRepository === null) {
+      log('open: you are currently not inside a repository');
     } else if (currentRepoTree.find(e => e.name === args[0] && e.type !== 'tree')) {
-      dispatch(getFile({
-        projectId: currentProject.id,
-        filePath: `${currentRepoPath}/${args[0]}`,
-        branch: currentProject.defaultBranch
+      dispatch(setTerminalValuePromptMode({
+        passwordMode: true,
+        promptLabel: 'Enter master password:&nbsp;',
+        onConfirm: masterKey => {
+          dispatch(setMasterKey(masterKey));
+          dispatch(getFileContent({
+            masterKey,
+            repoResourcePath: currentRepository.resourcePath,
+            filePath: joinPath(currentRepoPath, args[0])
+          }));
+        }
       }));
       return false;
     } else {
-      log(`open: ${args[0]}: No such file`);
+      log(`open: no such file: ${args[0]}`);
     }
     return true;
   }

@@ -1,56 +1,52 @@
 import { createLogic } from 'redux-logic';
-import { withCommonErrorHandling, gitlabApiClient } from 'services/utils';
+import GitHubApiClient from 'services/GitHubApiClient';
+import { withCommonErrorHandling } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
 import {
-  GET_PROJECTS, GET_REPOSITORY_TREE,
-  setProjects, setRepositoryTree
+  GET_REPOSITORIES, GET_REPOSITORY_TREE,
+  setRepositories, setRepositoryTree
 } from 'services/repo';
 import { spitToTerminal as log } from 'services/terminal';
 
-const projectsLogic = createLogic({
-  type: GET_PROJECTS,
+const repositoriesLogic = createLogic({
+  type: GET_REPOSITORIES,
   process: withCommonErrorHandling(async ({ getState }, dispatch) => {
-    const api = gitlabApiClient(authTokenSelector(getState()));
-    dispatch(log('Pulling projects...'));
-    const projects = await api.projects.all({ owned: true, order_by: 'path', sort: 'asc' });
-    const simplifiedProjects = [];
+    const client = new GitHubApiClient(authTokenSelector(getState()));
+    dispatch(log('Pulling repositories...'));
+    const repositories = await client.repositories();
+
     dispatch(log('&nbsp;'));
-    for (let project of projects) {
-      dispatch(log(`<span class="text-info">${project.path}</span>`));
-      simplifiedProjects.push({
-        id: project.id,
-        path: project.path,
-        defaultBranch: project.default_branch
-      });
+    dispatch(setRepositories(repositories));
+    for (let repository of repositories) {
+      dispatch(log(`<span class="text-info">${repository.name}</span>`));
     }
-    dispatch(setProjects(simplifiedProjects));
   })
 });
 
 const repositoryTreeLogic = createLogic({
   type: GET_REPOSITORY_TREE,
   process: withCommonErrorHandling(async ({ getState, action: { payload } }, dispatch) => {
-    const api = gitlabApiClient(authTokenSelector(getState()));
+    const client = new GitHubApiClient(authTokenSelector(getState()));
     dispatch(log('Pulling repository tree...'));
-    const { projectId, repoTreePath } = payload;
-    const tree = await api.projects.repository.listTree(projectId, { path: repoTreePath });
-    dispatch(log('&nbsp;'));
-    for (let item of tree) {
-      if (item.type === 'tree') {
-        dispatch(log(`<span class="text-info">${item.name}</span>`));
-      } else {
-        dispatch(log(item.name));
-      }
+    const { repoName, repoTreePath } = payload;
+    const entries = await client.treeEntries(repoName, repoTreePath);
+
+    if (entries.length === 0) {
+      return dispatch(log(`repository ${repoName} is empty`));
     }
-    dispatch(setRepositoryTree(tree));
-  }, {
-    404: dispatch => {
-      dispatch(log('The repository for this project is empty.'));
+
+    dispatch(log('&nbsp;'));
+    dispatch(setRepositoryTree(entries));
+    for (let entry of entries) {
+      dispatch(log(entry.type === 'tree'
+        ? `<span class="text-info">${entry.name}</span>`
+        : entry.name
+      ));
     }
   })
 });
 
 export default [
-  projectsLogic,
+  repositoriesLogic,
   repositoryTreeLogic
 ];

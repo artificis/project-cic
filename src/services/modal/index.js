@@ -8,7 +8,8 @@ export const SET_CIC_DATA = 'SET_CIC_DATA';
 export const CLOSE_MODAL = 'CLOSE_MODAL';
 export const CREATE_FILE = 'CREATE_FILE';
 export const UPDATE_FILE = 'UPDATE_FILE';
-export const GET_FILE = 'GET_FILE';
+export const GET_FILE_CONTENT = 'GET_FILE_CONTENT';
+export const SET_MASTER_KEY = 'SET_MASTER_KEY';
 
 // action creators
 export const openModal = createAction(OPEN_MODAL);
@@ -18,7 +19,8 @@ export const setCicData = createAction(SET_CIC_DATA);
 export const closeModal = createAction(CLOSE_MODAL);
 export const createFile = createAction(CREATE_FILE);
 export const updateFile = createAction(UPDATE_FILE);
-export const getFile = createAction(GET_FILE);
+export const getFileContent = createAction(GET_FILE_CONTENT);
+export const setMasterKey = createAction(SET_MASTER_KEY);
 
 // reducer
 const initialState = {
@@ -27,17 +29,20 @@ const initialState = {
   mode: 'create',
   filePath: null,
   imageBlob: null,
-  cicData: {}
+  cicData: {},
+  fileShaValue: null,
+  masterKey: ''
 };
 
 export default handleActions({
-  [OPEN_MODAL]: (state, { payload }) => ({
+  [OPEN_MODAL]: (state, { payload: { mode, filePath, imageBlob, fileShaValue } }) => ({
     ...state,
+    mode,
+    filePath,
+    imageBlob,
+    fileShaValue,
     open: true,
-    uiEnabled: true,
-    mode: payload.mode,
-    filePath: payload.filePath,
-    imageBlob: payload.imageBlob
+    uiEnabled: true
   }),
   [SET_MODAL_UI_ENABLED]: (state, { payload }) => ({
     ...state,
@@ -50,6 +55,10 @@ export default handleActions({
   [SET_CIC_DATA]: (state, { payload }) => ({
     ...state,
     cicData: payload
+  }),
+  [SET_MASTER_KEY]: (state, { payload }) => ({
+    ...state,
+    masterKey: payload
   }),
   [CLOSE_MODAL]: state => ({
     ...state,
@@ -67,6 +76,8 @@ export const modalModeSelector = state => state.modal.mode;
 export const modalFilePathSelector = state => state.modal.filePath;
 export const imageBlobSelector = state => state.modal.imageBlob;
 export const cicDataSelector = state => state.modal.cicData;
+export const modalFileShaValueSelector = state => state.modal.fileShaValue;
+export const masterKeySelector = state => state.modal.masterKey;
 
 // logics
 export const logics = require('./logics').default;

@@ -9,19 +9,18 @@ import {
 } from 'reactstrap';
 import classnames from 'classnames';
 import {
-  modalOpenSelector, modalUiEnabledSelector, modalModeSelector,
-  modalFilePathSelector,imageBlobSelector, cicDataSelector,
+  modalOpenSelector, modalUiEnabledSelector, modalModeSelector, masterKeySelector,
+  modalFilePathSelector, imageBlobSelector, cicDataSelector, modalFileShaValueSelector,
   closeModal, setCicData, createFile, updateFile
 } from 'services/modal';
-import { currentProjectSelector } from 'services/repo';
+import { currentRepositorySelector } from 'services/repo';
+import { generateFileContent } from 'services/utils';
 import TableView from './TableView';
 import QrCodeModal from './QrCodeModal';
 
 import 'brace/mode/json';
 import 'brace/theme/solarized_light';
 import 'brace/ext/searchbox';
-
-const { REACT_APP_SEPARATOR_WORD } = process.env;
 
 const mapStateToProps = createStructuredSelector({
   open: modalOpenSelector,
@@ -30,7 +29,9 @@ const mapStateToProps = createStructuredSelector({
   filePath: modalFilePathSelector,
   imageBlob: imageBlobSelector,
   cicData: cicDataSelector,
-  currentProject: currentProjectSelector
+  fileShaValue: modalFileShaValueSelector,
+  masterKey: masterKeySelector,
+  currentRepository: currentRepositorySelector
 });
 
 const mapDispatchToProps = {
@@ -87,11 +88,14 @@ export default class EditorModal extends React.Component {
   @autobind
   handleSaveClick(closeModalAfterSave = false) {
     const {
-      mode, filePath, imageBlob, cicData, currentProject,
+      mode, filePath, imageBlob, cicData, fileShaValue, masterKey,
+      currentRepository: { resourcePath: repoResourcePath },
       setCicData, createFile, updateFile
     } = this.props;
     const { activeTab, cicDataText } = this.state;
     const saveFile = mode === 'create' ? createFile : updateFile;
+    const extraOptions = mode === 'update' ? { sha: fileShaValue } : {};
+
     try {
       let data = cicData;
       if (activeTab === 'edit') {
@@ -100,13 +104,12 @@ export default class EditorModal extends React.Component {
       }
       saveFile({
         closeModalAfterSave,
-        projectId: currentProject.id,
-        filePath: encodeURIComponent(filePath),
-        branch: currentProject.defaultBranch || 'master',
+        repoResourcePath,
+        filePath,
         options: {
-          content: btoa(`${imageBlob}${REACT_APP_SEPARATOR_WORD}${btoa(JSON.stringify(data))}`),
-          commit_message: 'Test commit',
-          encoding: 'base64'
+          ...extraOptions,
+          content: generateFileContent(imageBlob, data, masterKey),
+          message: 'Test commit'
         }
       });
     } catch (err) {
