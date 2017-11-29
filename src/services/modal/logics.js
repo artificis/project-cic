@@ -2,7 +2,7 @@ import { createLogic } from 'redux-logic';
 import GitHubApiClient from 'services/GitHubApiClient';
 import { withCommonErrorHandling, gitlabApiClient } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
-import { CREATE_FILE, UPDATE_FILE, GET_FILE, CLOSE_MODAL } from 'services/modal';
+import { CREATE_FILE, UPDATE_FILE, GET_FILE_CONTENT, CLOSE_MODAL } from 'services/modal';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
 import { openModal, closeModal, setModalMode, setCicData } from 'services/modal';
 
@@ -46,20 +46,20 @@ const fileUpdateLogic = createLogic({
 });
 
 const fileReadLogic = createLogic({
-  type: GET_FILE,
+  type: GET_FILE_CONTENT,
   process: withCommonErrorHandling(async ({ getState, action: { payload } }, dispatch) => {
-    const api = gitlabApiClient(authTokenSelector(getState()));
+    const client = new GitHubApiClient(authTokenSelector(getState()));
     dispatch(log('Pulling file...'));
-    const { projectId, filePath, branch } = payload;
-    const res = await api.projects.repository.showFile(projectId, encodeURIComponent(filePath), branch);
-    let [imageBlob, cicData] = atob(res.body.content).split(process.env.REACT_APP_SEPARATOR_WORD);
+    const { repoResourcePath, filePath } = payload;
+    const body = (await client.getFileContent(repoResourcePath, filePath)).getBody();
+    let [imageBlob, cicData] = atob(body.content).split(process.env.REACT_APP_SEPARATOR_WORD);
 
     if (cicData) {
       dispatch(setCicData(JSON.parse(atob(cicData))));
       dispatch(log('Entering edit/view mode...'));
       dispatch(openModal({ imageBlob, filePath, mode: 'update' }));
     } else {
-      dispatch(log(`open: ${filePath}: Not a valid CIC file`));
+      dispatch(log(`open: not a valid CIC file: ${body.name}`));
       dispatch(log('&nbsp;'));
       dispatch(setTerminalBusy(false));
     }

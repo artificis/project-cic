@@ -12,7 +12,7 @@ import {
   getRepositoryTree,
   setCurrentRepositoryPath
 } from 'services/repo';
-import { openModal, getFile } from 'services/modal';
+import { openModal, getFileContent } from 'services/modal';
 import { command, requiresAuth } from './decorators';
 
 const { getState, dispatch } = store;
@@ -205,16 +205,15 @@ class Command {
       log('usage:');
       log('open &lt;filename&gt;');
     } else if (currentProject === null) {
-      log('You are currently not inside a project repository.');
+      log('You are currently not inside a project repository');
     } else if (currentRepoTree.find(e => e.name === args[0] && e.type !== 'tree')) {
-      dispatch(getFile({
-        projectId: currentProject.id,
-        filePath: `${currentRepoPath}/${args[0]}`,
-        branch: currentProject.defaultBranch
+      dispatch(getFileContent({
+        repoResourcePath: currentProject.resourcePath,
+        filePath: joinPath(currentRepoPath, args[0])
       }));
       return false;
     } else {
-      log(`open: ${args[0]}: No such file`);
+      log(`open: no such file: ${args[0]}`);
     }
     return true;
   }

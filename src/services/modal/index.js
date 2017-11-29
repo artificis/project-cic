@@ -8,7 +8,7 @@ export const SET_CIC_DATA = 'SET_CIC_DATA';
 export const CLOSE_MODAL = 'CLOSE_MODAL';
 export const CREATE_FILE = 'CREATE_FILE';
 export const UPDATE_FILE = 'UPDATE_FILE';
-export const GET_FILE = 'GET_FILE';
+export const GET_FILE_CONTENT = 'GET_FILE_CONTENT';
 
 // action creators
 export const openModal = createAction(OPEN_MODAL);
@@ -18,7 +18,7 @@ export const setCicData = createAction(SET_CIC_DATA);
 export const closeModal = createAction(CLOSE_MODAL);
 export const createFile = createAction(CREATE_FILE);
 export const updateFile = createAction(UPDATE_FILE);
-export const getFile = createAction(GET_FILE);
+export const getFileContent = createAction(GET_FILE_CONTENT);
 
 // reducer
 const initialState = {
