@@ -1,6 +1,10 @@
 import { createStructuredSelector } from 'reselect';
 import store from 'store';
-import { GITHUB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
+import {
+  GITHUB_OAUTH_URL,
+  authenticatedSelector, currentUserSelector,
+  setOauthToken, setCurrentUser
+} from 'services/auth';
 import { setTerminalBusy, setTerminalValuePromptMode } from 'services/terminal';
 import {
   repositoriesSelector,
@@ -8,8 +12,10 @@ import {
   currentRepositoryTreeSelector,
   currentRepositoryPathSelector,
   getRepositories,
+  setRepositories,
   setCurrentRepository,
   getRepositoryTree,
+  setRepositoryTree,
   setCurrentRepositoryPath
 } from 'services/repo';
 import { openModal, getFileContent, setMasterKey } from 'services/modal';
@@ -42,7 +48,7 @@ class Command {
     return true;
   }
 
-  @command('let user log in')
+  @command('let user sign in using his/her GitHub account')
   static login({ log }) {
     const { loggedIn } = state();
     if (loggedIn) {
@@ -198,6 +204,7 @@ class Command {
   static openNewImageFileDialog(filePath, log) {
     const fileInput = document.createElement('input');
     log('Please choose an image file');
+    log('&nbsp;');
     fileInput.type = 'file';
     fileInput.accept = '.jpg,.jpeg,.png';
     fileInput.onchange = () => {
@@ -248,6 +255,18 @@ class Command {
     } else {
       log(`open: no such file: ${args[0]}`);
     }
+    return true;
+  }
+
+  @command('let user sign out')
+  @requiresAuth
+  static logout() {
+    dispatch(setOauthToken(null));
+    dispatch(setCurrentUser(null));
+    dispatch(setRepositories([]));
+    dispatch(setCurrentRepository(null));
+    dispatch(setRepositoryTree([]));
+    dispatch(setCurrentRepositoryPath(''));
     return true;
   }
 }
