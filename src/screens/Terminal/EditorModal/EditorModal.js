@@ -60,6 +60,24 @@ export default class EditorModal extends React.Component {
     }
   }
 
+  validateCicData() {
+    try {
+      const json = JSON.parse(this.state.cicDataText);
+      if (Array.isArray(json)) {
+        return false;
+      }
+      if (Object.keys(json).every(key => {
+        if (!Array.isArray(json[key])) return false;
+        return json[key].every(row => row.length === 5);
+      })) {
+        return json;
+      }
+      return false;
+    } catch (err) {
+      return false;
+    }
+  }
+
   @autobind
   handleAceEditorChange(newValue) {
     this.setState({ cicDataText: newValue });
@@ -73,15 +91,13 @@ export default class EditorModal extends React.Component {
 
   @autobind
   handleViewTabClick() {
-    try {
-      const json = JSON.parse(this.state.cicDataText);
-      this.props.setCicData(json);
+    const data = this.validateCicData();
+    if (data) {
+      this.props.setCicData(data);
       this.switchTabTo('view');
-    } catch (err) {
-      if (err instanceof SyntaxError) {
-        this.aceEditor.editor.focus();
-        alert('Invalid JSON data');
-      }
+    } else {
+      this.aceEditor.editor.focus();
+      alert('Invalid JSON syntax or CIC data format');
     }
   }
 
@@ -92,16 +108,22 @@ export default class EditorModal extends React.Component {
       currentRepository: { resourcePath: repoResourcePath },
       setCicData, createFile, updateFile
     } = this.props;
-    const { activeTab, cicDataText } = this.state;
+    const { activeTab } = this.state;
     const saveFile = mode === 'create' ? createFile : updateFile;
     const extraOptions = mode === 'update' ? { sha: fileShaValue } : {};
+    let data = cicData;
 
-    try {
-      let data = cicData;
-      if (activeTab === 'edit') {
-        data = JSON.parse(cicDataText);
+    if (activeTab === 'edit') {
+      data = this.validateCicData();
+      if (data) {
         setCicData(data);
+      } else {
+        this.aceEditor.editor.focus();
+        alert('Invalid JSON syntax or CIC data format');
       }
+    }
+
+    if (data) {
       saveFile({
         closeModalAfterSave,
         repoResourcePath,
@@ -112,11 +134,6 @@ export default class EditorModal extends React.Component {
           message: 'Update CIC data'
         }
       });
-    } catch (err) {
-      if (err instanceof SyntaxError) {
-        this.aceEditor.editor.focus();
-        alert('Invalid JSON data');
-      }
     }
   }
 
