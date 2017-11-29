@@ -1,6 +1,6 @@
 import { createStructuredSelector } from 'reselect';
 import store from 'store';
-import { GITLAB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
+import { GITHUB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
 import { setTerminalBusy } from 'services/terminal';
 import {
   projectsSelector,
@@ -49,7 +49,7 @@ class Command {
       return true;
     } else {
       log('Signing in...');
-      setTimeout(() => window.location.assign(GITLAB_OAUTH_URL), 1000);
+      setTimeout(() => window.location.assign(GITHUB_OAUTH_URL), 1000);
       return false;
     }
   }
