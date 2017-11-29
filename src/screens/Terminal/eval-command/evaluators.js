@@ -3,12 +3,12 @@ import store from 'store';
 import { GITHUB_OAUTH_URL, authenticatedSelector, currentUserSelector } from 'services/auth';
 import { setTerminalBusy } from 'services/terminal';
 import {
-  projectsSelector,
-  currentProjectSelector,
+  repositoriesSelector,
+  currentRepositorySelector,
   currentRepositoryTreeSelector,
   currentRepositoryPathSelector,
-  getProjects,
-  setCurrentProject,
+  getRepositories,
+  setCurrentRepository,
   getRepositoryTree,
   setCurrentRepositoryPath
 } from 'services/repo';
@@ -21,8 +21,8 @@ const joinPath = (...parts) => parts.join('/').replace(/^\//, '');
 const selector = createStructuredSelector({
   loggedIn: authenticatedSelector,
   user: currentUserSelector,
-  projects: projectsSelector,
-  currentProject: currentProjectSelector,
+  repositories: repositoriesSelector,
+  currentRepository: currentRepositorySelector,
   currentRepoTree: currentRepositoryTreeSelector,
   currentRepoPath: currentRepositoryPathSelector
 });
@@ -63,66 +63,66 @@ class Command {
     return true;
   }
 
-  @command('list projects or repository tree')
+  @command('list repositories or repository tree')
   @requiresAuth
   static ls() {
-    const { currentProject, currentRepoPath } = state();
-    if (currentProject) {
-      this.lsRepositoryTree(currentProject, currentRepoPath);
+    const { currentRepository, currentRepoPath } = state();
+    if (currentRepository) {
+      this.lsRepositoryTree(currentRepository, currentRepoPath);
     } else {
-      this.lsProjects();
+      this.lsRepositories();
     }
   }
 
-  static lsProjects() {
-    dispatch(getProjects());
+  static lsRepositories() {
+    dispatch(getRepositories());
   }
 
-  static lsRepositoryTree(currentProject, currentRepoPath) {
+  static lsRepositoryTree(currentRepository, currentRepoPath) {
     dispatch(getRepositoryTree({
-      repoName: currentProject.name,
+      repoName: currentRepository.name,
       repoTreePath: currentRepoPath
     }));
   }
 
-  @command('get into project or repository tree folder')
+  @command('get into repository or repository tree folder')
   @requiresAuth
   static cd({ args, log }) {
     if (args.length === 0) {
       return this.cdToRoot();
     } else if (args[0] === '..') {
       return this.cdUpwards();
-    } else if (state().currentProject) {
+    } else if (state().currentRepository) {
       return this.cdIntoRepositoryTree(args[0], log);
     } else {
-      return this.cdIntoProject(args[0], log);
+      return this.cdIntoRepository(args[0], log);
     }
   }
 
   static cdToRoot() {
-    dispatch(setCurrentProject(null));
+    dispatch(setCurrentRepository(null));
     return true;
   }
 
   static cdUpwards() {
-    const { currentProject, currentRepoPath } = state();
+    const { currentRepository, currentRepoPath } = state();
     if (currentRepoPath !== '') {
       const pathItems = currentRepoPath.split('/');
       pathItems.pop();
       dispatch(setCurrentRepositoryPath(pathItems.join('/')));
-    } else if (currentProject) {
+    } else if (currentRepository) {
       this.cdToRoot();
     }
     return true;
   }
 
-  static cdIntoProject(name, log) {
-    const { projects } = state();
-    const project = projects.find(p => p.name === name);
-    if (project) {
-      dispatch(setCurrentProject(project));
+  static cdIntoRepository(name, log) {
+    const { repositories } = state();
+    const repository = repositories.find(repo => repo.name === name);
+    if (repository) {
+      dispatch(setCurrentRepository(repository));
     } else {
-      log(`cd: no such project: ${name}`);
+      log(`cd: no such repository: ${name}`);
     }
     return true;
   }
@@ -141,9 +141,9 @@ class Command {
   @command('print current working directory')
   @requiresAuth
   static pwd({ log }) {
-    const { currentProject, currentRepoPath } = state();
+    const { currentRepository, currentRepoPath } = state();
     const pathItems = [];
-    if (currentProject) pathItems.push(currentProject.name);
+    if (currentRepository) pathItems.push(currentRepository.name);
     if (currentRepoPath !== '') pathItems.push(currentRepoPath);
     log(`/${pathItems.join('/')}`);
     return true;
@@ -152,12 +152,12 @@ class Command {
   @command('prepare a new CIC file with specified image and open a modal', 'new')
   @requiresAuth
   static newFile({ args, log }) {
-    const { currentProject, currentRepoPath } = state();
+    const { currentRepository, currentRepoPath } = state();
     if (args.length === 0) {
       log('usage:');
       log('new &lt;filename&gt;');
-    } else if (currentProject === null) {
-      log('You are currently not inside a project repository');
+    } else if (currentRepository === null) {
+      log('new: you are currently not inside a repository');
     } else if (this.fileExists(args[0])) {
       log(`new: file already exists: ${args[0]}`);
     } else {
@@ -201,15 +201,15 @@ class Command {
   @command('open an existing CIC file')
   @requiresAuth
   static open({ args, log }) {
-    const { currentProject, currentRepoTree, currentRepoPath } = state();
+    const { currentRepository, currentRepoTree, currentRepoPath } = state();
     if (args.length === 0) {
       log('usage:');
       log('open &lt;filename&gt;');
-    } else if (currentProject === null) {
-      log('You are currently not inside a project repository');
+    } else if (currentRepository === null) {
+      log('open: you are currently not inside a repository');
     } else if (currentRepoTree.find(e => e.name === args[0] && e.type !== 'tree')) {
       dispatch(getFileContent({
-        repoResourcePath: currentProject.resourcePath,
+        repoResourcePath: currentRepository.resourcePath,
         filePath: joinPath(currentRepoPath, args[0])
       }));
       return false;

@@ -13,7 +13,7 @@ import {
   modalFilePathSelector, imageBlobSelector, cicDataSelector, modalFileShaValueSelector,
   closeModal, setCicData, createFile, updateFile
 } from 'services/modal';
-import { currentProjectSelector } from 'services/repo';
+import { currentRepositorySelector } from 'services/repo';
 import TableView from './TableView';
 import QrCodeModal from './QrCodeModal';
 
@@ -31,7 +31,7 @@ const mapStateToProps = createStructuredSelector({
   imageBlob: imageBlobSelector,
   cicData: cicDataSelector,
   fileShaValue: modalFileShaValueSelector,
-  currentProject: currentProjectSelector
+  currentRepository: currentRepositorySelector
 });
 
 const mapDispatchToProps = {
@@ -89,7 +89,7 @@ export default class EditorModal extends React.Component {
   handleSaveClick(closeModalAfterSave = false) {
     const {
       mode, filePath, imageBlob, cicData, fileShaValue,
-      currentProject: { resourcePath: repoResourcePath },
+      currentRepository: { resourcePath: repoResourcePath },
       setCicData, createFile, updateFile
     } = this.props;
     const { activeTab, cicDataText } = this.state;

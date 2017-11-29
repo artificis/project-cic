@@ -3,20 +3,20 @@ import GitHubApiClient from 'services/GitHubApiClient';
 import { withCommonErrorHandling } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
 import {
-  GET_PROJECTS, GET_REPOSITORY_TREE,
-  setProjects, setRepositoryTree
+  GET_REPOSITORIES, GET_REPOSITORY_TREE,
+  setRepositories, setRepositoryTree
 } from 'services/repo';
 import { spitToTerminal as log } from 'services/terminal';
 
-const projectsLogic = createLogic({
-  type: GET_PROJECTS,
+const repositoriesLogic = createLogic({
+  type: GET_REPOSITORIES,
   process: withCommonErrorHandling(async ({ getState }, dispatch) => {
     const client = new GitHubApiClient(authTokenSelector(getState()));
-    dispatch(log('Pulling projects...'));
+    dispatch(log('Pulling repositories...'));
     const repositories = await client.repositories();
 
     dispatch(log('&nbsp;'));
-    dispatch(setProjects(repositories));
+    dispatch(setRepositories(repositories));
     for (let repository of repositories) {
       dispatch(log(`<span class="text-info">${repository.name}</span>`));
     }
@@ -32,7 +32,7 @@ const repositoryTreeLogic = createLogic({
     const entries = await client.treeEntries(repoName, repoTreePath);
 
     if (entries.length === 0) {
-      return dispatch(log('The repository for this project is empty'));
+      return dispatch(log(`repository ${repoName} is empty`));
     }
 
     dispatch(log('&nbsp;'));
@@ -47,6 +47,6 @@ const repositoryTreeLogic = createLogic({
 });
 
 export default [
-  projectsLogic,
+  repositoriesLogic,
   repositoryTreeLogic
 ];

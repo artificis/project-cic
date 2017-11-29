@@ -1,37 +1,37 @@
 import { createAction, handleActions } from 'redux-actions';
 
 // constants
-export const GET_PROJECTS = 'GET_PROJECTS';
-export const SET_PROJECTS = 'SET_PROJECTS';
-export const SET_CURRENT_PROJECT = 'SET_CURRENT_PROJECT';
+export const GET_REPOSITORIES = 'GET_REPOSITORIES';
+export const SET_REPOSITORIES = 'SET_REPOSITORIES';
+export const SET_CURRENT_REPOSITORY = 'SET_CURRENT_REPOSITORY';
 export const GET_REPOSITORY_TREE = 'GET_REPOSITORY_TREE';
 export const SET_REPOSITORY_TREE = 'SET_REPOSITORY_TREE';
 export const SET_CURRENT_REPOSITORY_PATH = 'SET_CURRENT_REPOSITORY_PATH';
 
 // action creators
-export const getProjects = createAction(GET_PROJECTS);
-export const setProjects = createAction(SET_PROJECTS);
-export const setCurrentProject = createAction(SET_CURRENT_PROJECT);
+export const getRepositories = createAction(GET_REPOSITORIES);
+export const setRepositories = createAction(SET_REPOSITORIES);
+export const setCurrentRepository = createAction(SET_CURRENT_REPOSITORY);
 export const getRepositoryTree = createAction(GET_REPOSITORY_TREE);
 export const setRepositoryTree = createAction(SET_REPOSITORY_TREE);
 export const setCurrentRepositoryPath = createAction(SET_CURRENT_REPOSITORY_PATH);
 
 // reducer
 const initialState = {
-  projects: [],
-  currentProject: null,
+  repositories: [],
+  currentRepository: null,
   currentRepositoryTree: [],
   currentRepositoryPath: ''
 };
 
 export default handleActions({
-  [SET_PROJECTS]: (state, { payload }) => ({
+  [SET_REPOSITORIES]: (state, { payload }) => ({
     ...state,
-    projects: payload
+    repositories: payload
   }),
-  [SET_CURRENT_PROJECT]: (state, { payload }) => ({
+  [SET_CURRENT_REPOSITORY]: (state, { payload }) => ({
     ...state,
-    currentProject: payload,
+    currentRepository: payload,
     currentRepositoryTree: [],
     currentRepositoryPath: ''
   }),
@@ -46,8 +46,8 @@ export default handleActions({
 }, initialState);
 
 // selectors
-export const projectsSelector = state => state.repo.projects;
-export const currentProjectSelector = state => state.repo.currentProject;
+export const repositoriesSelector = state => state.repo.repositories;
+export const currentRepositorySelector = state => state.repo.currentRepository;
 export const currentRepositoryTreeSelector = state => state.repo.currentRepositoryTree;
 export const currentRepositoryPathSelector = state => state.repo.currentRepositoryPath;
 

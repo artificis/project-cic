@@ -10,7 +10,7 @@ export default function evalCommand(input, log) {
       args: args.filter(e => e !== '')
     });
   } else {
-    log(`Command not found: ${command}`);
+    log(`command not found: ${command}`);
     return true;
   }
 }
