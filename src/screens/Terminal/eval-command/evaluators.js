@@ -79,7 +79,7 @@ class Command {
 
   static lsRepositoryTree(currentProject, currentRepoPath) {
     dispatch(getRepositoryTree({
-      projectId: currentProject.id,
+      repoName: currentProject.name,
       repoTreePath: currentRepoPath
     }));
   }

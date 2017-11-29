@@ -1,6 +1,6 @@
 import { createLogic } from 'redux-logic';
 import GitHubApiClient from 'services/GitHubApiClient';
-import { withCommonErrorHandling, gitlabApiClient } from 'services/utils';
+import { withCommonErrorHandling } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
 import {
   GET_PROJECTS, GET_REPOSITORY_TREE,
@@ -14,33 +14,34 @@ const projectsLogic = createLogic({
     const client = new GitHubApiClient(authTokenSelector(getState()));
     dispatch(log('Pulling projects...'));
     const repositories = await client.repositories();
+    
     dispatch(log('&nbsp;'));
+    dispatch(setProjects(repositories));
     for (let repository of repositories) {
       dispatch(log(`<span class="text-info">${repository.name}</span>`));
     }
-    dispatch(setProjects(repositories));
   })
 });
 
 const repositoryTreeLogic = createLogic({
   type: GET_REPOSITORY_TREE,
   process: withCommonErrorHandling(async ({ getState, action: { payload } }, dispatch) => {
-    const api = gitlabApiClient(authTokenSelector(getState()));
+    const client = new GitHubApiClient(authTokenSelector(getState()));
     dispatch(log('Pulling repository tree...'));
-    const { projectId, repoTreePath } = payload;
-    const tree = await api.projects.repository.listTree(projectId, { path: repoTreePath });
-    dispatch(log('&nbsp;'));
-    for (let item of tree) {
-      if (item.type === 'tree') {
-        dispatch(log(`<span class="text-info">${item.name}</span>`));
-      } else {
-        dispatch(log(item.name));
-      }
+    const { repoName, repoTreePath } = payload;
+    const entries = await client.treeEntries(repoName, repoTreePath);
+
+    if (entries.length === 0) {
+      return dispatch(log('The repository for this project is empty.'));
     }
-    dispatch(setRepositoryTree(tree));
-  }, {
-    404: dispatch => {
-      dispatch(log('The repository for this project is empty.'));
+
+    dispatch(log('&nbsp;'));
+    dispatch(setRepositoryTree(entries));
+    for (let entry of entries) {
+      dispatch(log(entry.type === 'tree'
+        ? `<span class="text-info">${entry.name}</span>`
+        : entry.name
+      ));
     }
   })
 });

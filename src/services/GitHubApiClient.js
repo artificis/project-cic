@@ -63,4 +63,28 @@ export default class GitHubApiClient {
 
     return allNodes;
   }
+
+  async treeEntries(repoName, repoTreePath) {
+    const data = await this.requestGraphQlQuery(`
+      query ($repoName: String!, $revExpression: String!) {
+        viewer {
+          repository(name: $repoName) {
+            object(expression: $revExpression) {
+              ... on Tree {
+                entries {
+                  name
+                  type
+                }
+              }
+            }
+          }
+        }
+      }
+    `, {
+      repoName,
+      revExpression: `master:${repoTreePath}`
+    });
+    const { object } = data.viewer.repository;
+    return object && object.entries ? object.entries : [];
+  }
 }
