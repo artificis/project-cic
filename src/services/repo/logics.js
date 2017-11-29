@@ -1,4 +1,5 @@
 import { createLogic } from 'redux-logic';
+import GitHubApiClient from 'services/GitHubApiClient';
 import { withCommonErrorHandling, gitlabApiClient } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
 import {
@@ -10,20 +11,14 @@ import { spitToTerminal as log } from 'services/terminal';
 const projectsLogic = createLogic({
   type: GET_PROJECTS,
   process: withCommonErrorHandling(async ({ getState }, dispatch) => {
-    const api = gitlabApiClient(authTokenSelector(getState()));
+    const client = new GitHubApiClient(authTokenSelector(getState()));
     dispatch(log('Pulling projects...'));
-    const projects = await api.projects.all({ owned: true, order_by: 'path', sort: 'asc' });
-    const simplifiedProjects = [];
+    const repositories = await client.repositories();
     dispatch(log('&nbsp;'));
-    for (let project of projects) {
-      dispatch(log(`<span class="text-info">${project.path}</span>`));
-      simplifiedProjects.push({
-        id: project.id,
-        path: project.path,
-        defaultBranch: project.default_branch
-      });
+    for (let repository of repositories) {
+      dispatch(log(`<span class="text-info">${repository.name}</span>`));
     }
-    dispatch(setProjects(simplifiedProjects));
+    dispatch(setProjects(repositories));
   })
 });
 
