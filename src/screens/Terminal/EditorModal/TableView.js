@@ -17,7 +17,7 @@ const mapDispatchToProps = {
 
 @connect(mapStateToProps, mapDispatchToProps)
 export default class TableView extends React.Component {
-  handlePasswordTdClick(e) {
+  selectWholeText(e) {
     window.getSelection().selectAllChildren(e.target);
   }
 
@@ -45,8 +45,11 @@ export default class TableView extends React.Component {
           {cicData[category].map(row => (
             <tr key={shortid.generate()}>
               <td dangerouslySetInnerHTML={{ __html: markdown.toHTML(row[0]) }} />
-              <td>{row[1]}</td>
-              <td onClick={this.handlePasswordTdClick}>{row[2]}</td>
+              <td
+                dangerouslySetInnerHTML={{ __html: markdown.toHTML(row[1]) }}
+                onClick={this.selectWholeText}
+              />
+              <td onClick={this.selectWholeText}>{row[2]}</td>
               <td>{row[3]}</td>
               <td dangerouslySetInnerHTML={{ __html: markdown.toHTML(row[4]) }} />
               <td>
