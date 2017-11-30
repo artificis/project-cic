@@ -16,7 +16,7 @@ const newFileLogic = createLogic({
 
     dispatch(log('New file created'));
     dispatch(setModalMode('update'));
-    dispatch(setFileShaValue(body.commit.sha));
+    dispatch(setFileShaValue(body.content.sha));
 
     if (closeModalAfterSave) {
       dispatch(closeModal());
@@ -35,7 +35,7 @@ const fileUpdateLogic = createLogic({
     const body = (await client.updateFile(repoResourcePath, filePath, options)).getBody();
     
     dispatch(log('File updated'));
-    dispatch(setFileShaValue(body.commit.sha));
+    dispatch(setFileShaValue(body.content.sha));
 
     if (closeModalAfterSave) {
       dispatch(closeModal());
