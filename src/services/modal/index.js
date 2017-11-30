@@ -5,6 +5,7 @@ export const OPEN_MODAL = 'OPEN_MODAL';
 export const SET_MODAL_UI_ENABLED = 'SET_MODAL_UI_ENABLED';
 export const SET_MODAL_MODE = 'SET_MODAL_MODE';
 export const SET_CIC_DATA = 'SET_CIC_DATA';
+export const SET_FILE_SHA_VALUE = 'SET_FILE_SHA_VALUE';
 export const CLOSE_MODAL = 'CLOSE_MODAL';
 export const CREATE_FILE = 'CREATE_FILE';
 export const UPDATE_FILE = 'UPDATE_FILE';
@@ -16,6 +17,7 @@ export const openModal = createAction(OPEN_MODAL);
 export const setModalUiEnabled = createAction(SET_MODAL_UI_ENABLED);
 export const setModalMode = createAction(SET_MODAL_MODE);
 export const setCicData = createAction(SET_CIC_DATA);
+export const setFileShaValue = createAction(SET_FILE_SHA_VALUE);
 export const closeModal = createAction(CLOSE_MODAL);
 export const createFile = createAction(CREATE_FILE);
 export const updateFile = createAction(UPDATE_FILE);
@@ -55,6 +57,10 @@ export default handleActions({
   [SET_CIC_DATA]: (state, { payload }) => ({
     ...state,
     cicData: payload
+  }),
+  [SET_FILE_SHA_VALUE]: (state, { payload }) => ({
+    ...state,
+    fileShaValue: payload
   }),
   [SET_MASTER_KEY]: (state, { payload }) => ({
     ...state,

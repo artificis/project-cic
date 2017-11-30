@@ -4,7 +4,7 @@ import { withCommonErrorHandling, parseFileContent } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
 import { CREATE_FILE, UPDATE_FILE, GET_FILE_CONTENT, CLOSE_MODAL } from 'services/modal';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
-import { openModal, closeModal, setModalMode, setCicData } from 'services/modal';
+import { openModal, closeModal, setModalMode, setCicData, setFileShaValue } from 'services/modal';
 
 const newFileLogic = createLogic({
   type: CREATE_FILE,
@@ -12,10 +12,11 @@ const newFileLogic = createLogic({
     const client = new GitHubApiClient(authTokenSelector(getState()));
     dispatch(log('Creating a new file...'));
     const { closeModalAfterSave, repoResourcePath, filePath, options } = payload;
+    const body = (await client.createFile(repoResourcePath, filePath, options)).getBody();
 
-    await client.createFile(repoResourcePath, filePath, options);
     dispatch(log('New file created'));
     dispatch(setModalMode('update'));
+    dispatch(setFileShaValue(body.commit.sha));
 
     if (closeModalAfterSave) {
       dispatch(closeModal());
@@ -31,9 +32,10 @@ const fileUpdateLogic = createLogic({
     const client = new GitHubApiClient(authTokenSelector(getState()));
     dispatch(log('Updating file...'));
     const { closeModalAfterSave, repoResourcePath, filePath, options } = payload;
-
-    await client.updateFile(repoResourcePath, filePath, options);
+    const body = (await client.updateFile(repoResourcePath, filePath, options)).getBody();
+    
     dispatch(log('File updated'));
+    dispatch(setFileShaValue(body.commit.sha));
 
     if (closeModalAfterSave) {
       dispatch(closeModal());
