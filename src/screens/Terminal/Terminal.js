@@ -14,7 +14,7 @@ import evalCommand from './eval-command';
 import EditorModal from './EditorModal';
 import appInfo from 'services/../../package.json';
 
-const commandPromptSymbol = '313-AMT4-030>&nbsp;';
+const commandPromptSymbol = '313-AMT7-028>&nbsp;';
 
 const mapStateToProps = createStructuredSelector({
   logs: terminalLogsSelector,
@@ -146,7 +146,7 @@ export default class Terminal extends React.Component {
     const commandPromptEl = isBusy || valuePromptMode.on
       ? null
       : (<div className="d-flex align-items-center">
-          <div dangerouslySetInnerHTML={{ __html: commandPromptSymbol }} />
+          <p dangerouslySetInnerHTML={{ __html: commandPromptSymbol }} />
           <input
             className="terminal__input"
             type="text"
@@ -159,7 +159,7 @@ export default class Terminal extends React.Component {
         </div>);
     const valuePromptEl = valuePromptMode.on
       ? (<div className="d-flex align-items-center">
-          <div dangerouslySetInnerHTML={{ __html: valuePromptMode.promptLabel }} />
+          <p dangerouslySetInnerHTML={{ __html: valuePromptMode.promptLabel }} />
           <input
             className="terminal__input"
             type={valuePromptMode.passwordMode ? 'password' : 'text'}
