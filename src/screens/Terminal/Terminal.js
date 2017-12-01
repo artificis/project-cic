@@ -141,37 +141,39 @@ export default class Terminal extends React.Component {
     resetTerminalValuePromptMode();
   }
 
+  getPromptComponent(isValuePrompt = false) {
+    const { valuePromptMode } = this.props;
+    let promptLabel = commandPromptSymbol;
+    let inputType = 'text';
+    let refName = 'commandPromptInput';
+
+    if (isValuePrompt) {
+      promptLabel = valuePromptMode.promptLabel;
+      inputType = valuePromptMode.passwordMode ? 'password' : 'text';
+      refName = 'valuePromptInput';
+    }
+
+    return (
+      <div className="d-flex align-items-center">
+        <p dangerouslySetInnerHTML={{ __html: promptLabel }} />
+        <input
+          className="terminal__input"
+          type={inputType}
+          autoFocus
+          autoComplete="off"
+          ref={e => { this[refName] = e; }}
+          value={this.state.inputValue}
+          onChange={this.handleInputChange}
+          onKeyDown={this.handleKeyDown}
+        />
+      </div>
+    );
+  }
+
   render() {
     const { logs, isBusy, valuePromptMode } = this.props;
-    const commandPromptEl = isBusy || valuePromptMode.on
-      ? null
-      : (<div className="d-flex align-items-center">
-          <p dangerouslySetInnerHTML={{ __html: commandPromptSymbol }} />
-          <input
-            className="terminal__input"
-            type="text"
-            ref={e => { this.commandPromptInput = e; }}
-            autoFocus
-            value={this.state.inputValue}
-            onChange={this.handleInputChange}
-            onKeyDown={this.handleKeyDown}
-          />
-        </div>);
-    const valuePromptEl = valuePromptMode.on
-      ? (<div className="d-flex align-items-center">
-          <p dangerouslySetInnerHTML={{ __html: valuePromptMode.promptLabel }} />
-          <input
-            className="terminal__input"
-            type={valuePromptMode.passwordMode ? 'password' : 'text'}
-            ref={e => { this.valuePromptInput = e; }}
-            autoFocus
-            autoComplete="off"
-            value={this.state.inputValue}
-            onChange={this.handleInputChange}
-            onKeyDown={this.handleKeyDown}
-          />
-        </div>)
-      : null;
+    const commandPromptEl = isBusy || valuePromptMode.on ? null : this.getPromptComponent();
+    const valuePromptEl = valuePromptMode.on ? this.getPromptComponent(true) : null;
 
     return (
       <div
