@@ -5,8 +5,8 @@
 }
 
 @font-face {
-  font-family: "Hermit-Light";
-  src: local("Hermit-Light"), url(~fonts/Hermit-light.otf) format("opentype");
+  font-family: "Operator-Mono";
+  src: local("Operator-Mono"), url(~fonts/OperatorMono-XLight.otf) format("opentype");
 }
 
 @font-face {
@@ -22,7 +22,7 @@ $primary-color: #afe3d7;
 
 body {
   background: black;
-  font: 1em "Hermit-Light", monospace;
+  font: 1rem "Operator-Mono", monospace;
   margin: 0;
 }
 

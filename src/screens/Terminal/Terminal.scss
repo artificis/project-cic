@@ -1,4 +1,4 @@
-$line-height: 23px;
+$line-height: 1.3rem;
 
 .terminal {
   @extend .container-fluid;
@@ -6,7 +6,7 @@ $line-height: 23px;
   min-height: 100vh;
 
   p {
-    height: $line-height;
+    line-height: $line-height;
     margin-bottom: 0;
   }
 }
@@ -17,6 +17,7 @@ $line-height: 23px;
   border: none;
   flex-grow: 1;
   height: $line-height;
+  margin-top: -1px;
   
   &:focus {
     outline: none;
