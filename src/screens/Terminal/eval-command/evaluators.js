@@ -43,7 +43,7 @@ class Command {
     const maxCmdLength = Math.max(...Object.keys(this.commandDescriptions).map(e => e.length));
     for (let [cmd, desc] of Object.entries(this.commandDescriptions)) {
       if (cmd === 'help') continue;
-      log(`${cmd.padEnd(maxCmdLength + 3).replace(/ /g, '&nbsp;')}<span class="text-secondary">${desc}</span>`);
+      log(`${cmd.padEnd(maxCmdLength + 3).replace(/ /g, '&nbsp;')}<span class="text-light">${desc}</span>`);
     }
     return true;
   }

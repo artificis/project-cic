@@ -23,3 +23,17 @@ $line-height: 1.4rem;
     outline: none;
   }
 }
+
+.terminal__caret {
+  height: $line-height;
+  padding-top: 3px;
+
+  &::before {
+    background: $dark;
+    content: "";
+    height: $line-height;
+    position: absolute;
+    top: 0;
+    width: 1px;
+  }
+}

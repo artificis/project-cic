@@ -14,7 +14,23 @@ import evalCommand from './eval-command';
 import EditorModal from './EditorModal';
 import appInfo from 'services/../../package.json';
 
+const VK_ENTER = 0x0d;
+const VK_C = 0x43;
+const VK_ARROW_LEFT = 0x25;
+const VK_ARROW_TOP = 0x26;
+const VK_ARROW_RIGHT = 0x27;
+const VK_ARROW_BOTTOM = 0x28;
+const VK_HOME = 0x24;
+const VK_END = 0x23;
 const commandPromptSymbol = '313-AMT7-028>&nbsp;';
+const charactersWithShiftKey = {
+  [VK_ARROW_LEFT]: 'D',
+  [VK_ARROW_TOP]: 'A',
+  [VK_ARROW_RIGHT]: 'C',
+  [VK_ARROW_BOTTOM]: 'B',
+  [VK_HOME]: 'H',
+  [VK_END]: 'F'
+};
 
 const mapStateToProps = createStructuredSelector({
   logs: terminalLogsSelector,
@@ -49,10 +65,28 @@ export default class Terminal extends React.Component {
         log('&nbsp;');
       }
     }
+
+    setTimeout(() => {
+      if (this.caret) {
+        this.caret.style.left = `${this.promptLabel.offsetWidth + this.cmdInputShadow.offsetWidth}px`;
+      }
+    }, 1);
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps, prevState) {
+    const promptInputRef = this.props.valuePromptMode.on ? 'valuePromptInput' : 'commandPromptInput';
+    if (
+      this[promptInputRef] &&
+      (prevState.inputValue !== this.state.inputValue || (prevProps.isBusy && !this.props.isBusy))
+    ) {
+      this.updateUnderscoreCaret(this[promptInputRef].selectionStart);
+    }
     window.scrollTo(0, this.wrapperEl.scrollHeight);
+  }
+
+  updateUnderscoreCaret(position) {
+    this.cmdInputShadow.innerHTML = this.state.inputValue.substr(0, position).replace(/ /g, '&nbsp;');
+    this.caret.style.left = `${this.promptLabel.offsetWidth + this.cmdInputShadow.offsetWidth}px`;
   }
 
   checkIfOAuthCallback() {
@@ -88,16 +122,38 @@ export default class Terminal extends React.Component {
   }
 
   @autobind
-  handleInputChange(e) {
-    this.setState({ inputValue: e.target.value });
+  handleInputChange({ target: { value } }) {
+    this.setState({ inputValue: value });
   }
 
   @autobind
-  async handleKeyDown({ keyCode, ctrlKey, altKey, metaKey, shiftKey }) {
-    if (keyCode === 0x0d && !ctrlKey && !altKey && !metaKey && !shiftKey) {
+  handleKeyDown(e) {
+    const { target, keyCode, ctrlKey, altKey, metaKey, shiftKey } = e;
+    const { inputValue } = this.state;
+
+    if (keyCode === VK_ENTER && !ctrlKey && !altKey && !metaKey && !shiftKey) {
       this.onPressEnter();
-    } else if (keyCode === 0x43 && ctrlKey && !metaKey) {
+    } else if (keyCode === VK_C && ctrlKey && !metaKey) {
       this.onPressCancel();
+    } else if (Object.keys(charactersWithShiftKey).includes(keyCode.toString()) && shiftKey) {
+      const caretPos = target.selectionStart;
+      const inputValueChars = inputValue.split('');
+      inputValueChars.splice(caretPos, 0, charactersWithShiftKey[keyCode]);
+      this.setState({ inputValue: inputValueChars.join('') });
+      setTimeout(() => {
+        target.selectionStart = caretPos + 1;
+        target.selectionEnd = caretPos + 1;
+        this.updateUnderscoreCaret(caretPos + 1);
+      }, 1);
+      e.preventDefault();
+    } else if (keyCode === VK_ARROW_LEFT) {
+      this.updateUnderscoreCaret(target.selectionStart - 1);
+    } else if (keyCode === VK_ARROW_RIGHT) {
+      this.updateUnderscoreCaret(target.selectionStart + 1);
+    } else if (keyCode === VK_HOME) {
+      this.updateUnderscoreCaret(0);
+    } else if (keyCode === VK_END) {
+      this.updateUnderscoreCaret(inputValue.length);
     }
   }
 
@@ -154,18 +210,31 @@ export default class Terminal extends React.Component {
     }
 
     return (
-      <div className="d-flex align-items-center">
-        <p dangerouslySetInnerHTML={{ __html: promptLabel }} />
+      <div className="position-relative d-flex align-items-center">
+        <p
+          dangerouslySetInnerHTML={{ __html: promptLabel }}
+          ref={e => { this.promptLabel = e; }}
+        />
+        <p className="invisible position-absolute" ref={e => { this.cmdInputShadow = e; }} />
         <input
           className="terminal__input"
           type={inputType}
           autoFocus
           autoComplete="off"
+          autoCorrect="off"
+          spellCheck={false}
           ref={e => { this[refName] = e; }}
           value={this.state.inputValue}
           onChange={this.handleInputChange}
           onKeyDown={this.handleKeyDown}
         />
+        <span
+          className="position-absolute terminal__caret"
+          ref={e => { this.caret = e; }}
+        >
+          _
+        </span>
+        <p className="position-absolute w-100">&nbsp;</p>
       </div>
     );
   }
