@@ -21,6 +21,9 @@ $line-height: 1.4rem;
   
   &:focus {
     outline: none;
+    + .terminal__caret span {
+      animation: blinker 0.7s cubic-bezier(0.42, 0, 0.58, 1) infinite alternate;
+    }
   }
 }
 
@@ -36,4 +39,8 @@ $line-height: 1.4rem;
     top: 0;
     width: 1px;
   }
+}
+
+@keyframes blinker {
+  50% { opacity: 0; }
 }

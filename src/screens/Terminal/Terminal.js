@@ -232,7 +232,7 @@ export default class Terminal extends React.Component {
           className="position-absolute terminal__caret"
           ref={e => { this.caret = e; }}
         >
-          _
+          <span>_</span>
         </span>
         <p className="position-absolute w-100">&nbsp;</p>
       </div>
