@@ -33,6 +33,7 @@
   }
 }
 
-.search-field:focus {
-  box-shadow: none;
+.search-field {
+  font-size: 0.9rem;
+  &:focus { box-shadow: none; }
 }
