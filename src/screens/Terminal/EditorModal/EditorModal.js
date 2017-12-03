@@ -4,14 +4,16 @@ import { createStructuredSelector } from 'reselect';
 import autobind from 'autobind-decorator';
 import AceEditor from 'react-ace';
 import {
-  Modal, ModalBody, ModalFooter, Button,
+  Input, Modal, ModalBody, ModalFooter, Button,
   Nav, NavItem, NavLink, TabContent, TabPane
 } from 'reactstrap';
 import classnames from 'classnames';
+
 import {
   modalOpenSelector, modalUiEnabledSelector, modalModeSelector, masterKeySelector,
   modalFilePathSelector, imageBlobSelector, cicDataSelector, modalFileShaValueSelector,
-  closeModal, setCicData, createFile, updateFile
+  searchKeywordSelector,
+  setSearchKeyword, closeModal, setCicData, createFile, updateFile
 } from 'services/modal';
 import { currentRepositorySelector } from 'services/repo';
 import { generateFileContent } from 'services/utils';
@@ -29,6 +31,7 @@ const mapStateToProps = createStructuredSelector({
   filePath: modalFilePathSelector,
   imageBlob: imageBlobSelector,
   cicData: cicDataSelector,
+  searchKeyword: searchKeywordSelector,
   fileShaValue: modalFileShaValueSelector,
   masterKey: masterKeySelector,
   currentRepository: currentRepositorySelector
@@ -37,6 +40,7 @@ const mapStateToProps = createStructuredSelector({
 const mapDispatchToProps = {
   closeModal,
   setCicData,
+  setSearchKeyword,
   createFile,
   updateFile
 };
@@ -102,6 +106,18 @@ export default class EditorModal extends React.Component {
   }
 
   @autobind
+  handleSearchFieldChange(e) {
+    this.props.setSearchKeyword(e.target.value);
+  }
+
+  @autobind
+  handleModalKeyDown() {
+    if (this.state.activeTab === 'view') {
+      document.getElementById('search_field').focus();
+    }
+  }
+
+  @autobind
   handleSaveClick(closeModalAfterSave = false) {
     const {
       mode, filePath, imageBlob, cicData, fileShaValue, masterKey,
@@ -147,7 +163,7 @@ export default class EditorModal extends React.Component {
     const { activeTab, cicDataText } = this.state;
 
     return (
-      <Modal isOpen={open} id="cic_data_modal" fade={false}>
+      <Modal isOpen={open} id="cic_data_modal" fade={false} tabIndex={1} onKeyDown={this.handleModalKeyDown}>
         <ModalBody>
           <Nav tabs>
             <NavItem>
@@ -184,8 +200,15 @@ export default class EditorModal extends React.Component {
                 onChange={this.handleAceEditorChange}
               />
             </TabPane>
-            <TabPane tabId="view" className="py-3">
-              <TableView />
+            <TabPane tabId="view" className="py-3 view-tab">
+              <Input
+                className="search-field"
+                placeholder="Search"
+                id="search_field"
+                value={this.props.searchKeyword}
+                onChange={this.handleSearchFieldChange}
+              />
+              <div className="table-wrapper"><TableView /></div>
               <QrCodeModal />
             </TabPane>
           </TabContent>

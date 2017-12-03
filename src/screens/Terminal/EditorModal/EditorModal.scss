@@ -1,10 +1,21 @@
 #cic_data_modal {
   max-width: 95%;
+  &:focus { outline: none; }
 
   .modal-body   { height: 85vh; }
   .tab-content  { height: 95%; }
   .tab-pane {
     height: 100%;
+    overflow-y: scroll;
+  }
+
+  .view-tab {
+    overflow-y: visible;
+  }
+
+  .table-wrapper {
+    height: calc(100% - 38px);
+    margin-top: 21px;
     overflow-y: scroll;
   }
 }
@@ -20,4 +31,8 @@
     vertical-align: middle;
     &:nth-child(3) { width: 50%; }
   }
+}
+
+.search-field:focus {
+  box-shadow: none;
 }

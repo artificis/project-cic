@@ -40,7 +40,7 @@ export function withCommonErrorHandling(
 export function generateFileContent(imageBlob, cicData, masterKey) {
   const encryptedData = sjcl.encrypt(masterKey, btoa(JSON.stringify(cicData)));
   return btoa(`${imageBlob}${REACT_APP_SEPARATOR_WORD}${btoa(encryptedData)}`);
-}
+};
 
 export function parseFileContent(content, masterKey) {
   let cicData;
@@ -57,4 +57,24 @@ export function parseFileContent(content, masterKey) {
   }
   
   return [imageBlob, cicData];
-}
+};
+
+export function filteredCicData(haystack, needle) {
+  if (needle === '') {
+    return haystack;
+  }
+
+  const result = {};
+  const includesNeedle = e => e.includes(needle);
+
+  for (let category in haystack) {
+    result[category] = haystack[category].filter(row => {
+      return [...row.slice(0, 2), ...row.slice(3)].some(includesNeedle)
+    });
+    if (result[category].length === 0) {
+      delete result[category];
+    }
+  }
+
+  return result;
+};

@@ -4,11 +4,11 @@ import { createStructuredSelector } from 'reselect';
 import shortid from 'shortid';
 import { markdown } from 'markdown';
 import { Table, Button } from 'reactstrap';
-import { cicDataSelector } from 'services/modal';
+import { filteredCicDataSelector } from 'services/modal';
 import { openQrCodeModal } from 'services/qrcode-modal';
 
 const mapStateToProps = createStructuredSelector({
-  cicData: cicDataSelector
+  cicData: filteredCicDataSelector
 });
 
 const mapDispatchToProps = {
