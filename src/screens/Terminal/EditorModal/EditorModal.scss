@@ -2,6 +2,14 @@
   max-width: 95%;
   &:focus { outline: none; }
 
+  .nav-link.active:hover { color: #fff; }
+
+  .btn-toggle-min-max {
+    padding-bottom: 2px;
+    position: absolute;
+    right: 0;
+  }
+
   .modal-body   { height: 85vh; }
   .tab-content  { height: 95%; }
   .tab-pane {

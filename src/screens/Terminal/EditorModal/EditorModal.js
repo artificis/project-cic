@@ -49,7 +49,8 @@ const mapDispatchToProps = {
 export default class EditorModal extends React.Component {
   state = {
     activeTab: 'edit',
-    cicDataText: ''
+    cicDataText: '{}',
+    minimized: false
   }
 
   componentWillReceiveProps(nextProps) {
@@ -90,7 +91,6 @@ export default class EditorModal extends React.Component {
   @autobind
   handleEditTabClick() {
     this.switchTabTo('edit');
-    this.aceEditor.editor.focus();
   }
 
   @autobind
@@ -112,7 +112,9 @@ export default class EditorModal extends React.Component {
 
   @autobind
   handleModalKeyDown() {
-    if (this.state.activeTab === 'view') {
+    if (this.state.activeTab === 'edit') {
+      this.aceEditor.editor.focus();
+    } else {
       document.getElementById('search_field').focus();
     }
   }
@@ -158,14 +160,31 @@ export default class EditorModal extends React.Component {
     this.props.closeModal();
   }
 
+  @autobind
+  handleToggleMinMaxButtonClick() {
+    const { minimized } = this.state;
+    const modalBody = document.getElementById('modal_body');
+    const tabContent = document.getElementById('tab_content');
+
+    if (minimized) {
+      modalBody.style.height = this.modalBodyStyleHeight || '85vh';
+      tabContent.style.display = 'block';
+    } else {
+      this.modalBodyStyleHeight = modalBody.style.height;
+      modalBody.style.height = '63px';
+      tabContent.style.display = 'none';
+    }
+    this.setState({ minimized: !minimized });
+  }
+
   render() {
     const { open, uiEnabled } = this.props;
-    const { activeTab, cicDataText } = this.state;
+    const { activeTab, cicDataText, minimized } = this.state;
 
     return (
       <Modal isOpen={open} id="cic_data_modal" fade={false} tabIndex={1} onKeyDown={this.handleModalKeyDown}>
-        <ModalBody>
-          <Nav tabs>
+        <ModalBody id="modal_body">
+          <Nav pills className="position-relative">
             <NavItem>
               <NavLink
                 disabled={!uiEnabled}
@@ -184,8 +203,16 @@ export default class EditorModal extends React.Component {
                 View
               </NavLink>
             </NavItem>
+            <Button
+              className="btn-toggle-min-max"
+              size="sm"
+              outline
+              onClick={this.handleToggleMinMaxButtonClick}
+            >
+              {minimized ? '↧' : '↥'}
+            </Button>
           </Nav>
-          <TabContent activeTab={activeTab}>
+          <TabContent activeTab={activeTab} id="tab_content">
             <TabPane tabId="edit" className="py-3">
               <AceEditor
                 mode="json"
@@ -203,7 +230,7 @@ export default class EditorModal extends React.Component {
             <TabPane tabId="view" className="py-3 view-tab">
               <Input
                 className="search-field"
-                placeholder="Search"
+                placeholder="🔎"
                 id="search_field"
                 value={this.props.searchKeyword}
                 onChange={this.handleSearchFieldChange}
