@@ -17,6 +17,7 @@ import {
 } from 'services/modal';
 import { currentRepositorySelector } from 'services/repo';
 import { generateFileContent } from 'services/utils';
+import FaqModal from './FaqModal';
 import TableView from './TableView';
 import QrCodeModal from './QrCodeModal';
 
@@ -50,7 +51,8 @@ export default class EditorModal extends React.Component {
   state = {
     activeTab: 'edit',
     cicDataText: '{}',
-    minimized: false
+    minimized: false,
+    faqModalOpen: false
   }
 
   componentWillReceiveProps(nextProps) {
@@ -161,6 +163,16 @@ export default class EditorModal extends React.Component {
   }
 
   @autobind
+  handleFaqButtonClick() {
+    this.setState({ faqModalOpen: true });
+  }
+
+  @autobind
+  handleFaqModalClose() {
+    this.setState({ faqModalOpen: false });
+  }
+
+  @autobind
   handleToggleMinMaxButtonClick() {
     const { minimized } = this.state;
     const modalBody = document.getElementById('modal_body');
@@ -179,7 +191,7 @@ export default class EditorModal extends React.Component {
 
   render() {
     const { open, uiEnabled } = this.props;
-    const { activeTab, cicDataText, minimized } = this.state;
+    const { activeTab, cicDataText, minimized, faqModalOpen } = this.state;
 
     return (
       <Modal isOpen={open} id="cic_data_modal" fade={false} tabIndex={1} onKeyDown={this.handleModalKeyDown}>
@@ -203,6 +215,14 @@ export default class EditorModal extends React.Component {
                 View
               </NavLink>
             </NavItem>
+            <Button
+              className="btn-faq"
+              size="sm"
+              outline
+              onClick={this.handleFaqButtonClick}
+            >
+              ?
+            </Button>
             <Button
               className="btn-toggle-min-max"
               size="sm"
@@ -239,6 +259,7 @@ export default class EditorModal extends React.Component {
               <QrCodeModal />
             </TabPane>
           </TabContent>
+          <FaqModal isOpen={faqModalOpen} onToggle={this.handleFaqModalClose} />
         </ModalBody>
         <ModalFooter>
           <Button disabled={!uiEnabled} color="primary" size="sm" onClick={() => this.handleSaveClick()}>Save</Button>

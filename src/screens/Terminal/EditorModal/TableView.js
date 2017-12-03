@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import shortid from 'shortid';
-import { markdown } from 'markdown';
+import marked from 'marked';
 import { Table, Button } from 'reactstrap';
 import { filteredCicDataSelector } from 'services/modal';
 import { openQrCodeModal } from 'services/qrcode-modal';
@@ -44,14 +44,14 @@ export default class TableView extends React.Component {
         <tbody>
           {cicData[category].map(row => (
             <tr key={shortid.generate()}>
-              <td dangerouslySetInnerHTML={{ __html: markdown.toHTML(row[0]) }} />
+              <td dangerouslySetInnerHTML={{ __html: marked(row[0]) }} />
               <td
-                dangerouslySetInnerHTML={{ __html: markdown.toHTML(row[1]) }}
+                dangerouslySetInnerHTML={{ __html: marked(row[1]) }}
                 onClick={this.selectWholeText}
               />
               <td onClick={this.selectWholeText}>{row[2]}</td>
               <td>{row[3]}</td>
-              <td dangerouslySetInnerHTML={{ __html: markdown.toHTML(row[4]) }} />
+              <td dangerouslySetInnerHTML={{ __html: marked(row[4]) }} />
               <td>
                 <Button
                   size="sm"
