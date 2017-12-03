@@ -19,6 +19,7 @@ import {
   setCurrentRepositoryPath
 } from 'services/repo';
 import { openModal, getFileContent, setMasterKey } from 'services/modal';
+import appInfo from 'services/../../package.json';
 import { command, requiresAuth } from './decorators';
 
 const { getState, dispatch } = store;
@@ -267,6 +268,12 @@ class Command {
     dispatch(setCurrentRepository(null));
     dispatch(setRepositoryTree([]));
     dispatch(setCurrentRepositoryPath(''));
+    return true;
+  }
+
+  @command('show version number')
+  static version({ log }) {
+    log(`Project CIC v${appInfo.version} [${window.navigator.userAgent}]`);
     return true;
   }
 }
