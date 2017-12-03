@@ -66,7 +66,8 @@ export function filteredCicData(haystack, needle) {
   }
 
   const result = {};
-  const includesNeedle = e => e.includes(needle);
+  const regexp = new RegExp(needle, 'i');
+  const includesNeedle = e => regexp.test(e);
 
   for (let category in haystack) {
     result[category] = haystack[category].filter(row => {
