@@ -6,6 +6,29 @@
 @font-face {
   font-family: "SF-Pro-Display";
   src: local("SF-Pro-Display"), url(~fonts/SF-Pro-Display-Regular.otf) format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF-Pro-Display";
+  src: local("SF-Pro-Display"), url(~fonts/SF-Pro-Display-RegularItalic.otf) format("opentype");
+  font-weight: normal;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "SF-Pro-Display";
+  src: local("SF-Pro-Display"), url(~fonts/SF-Pro-Display-Semibold.otf) format("opentype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "SF-Pro-Display";
+  src: local("SF-Pro-Display"), url(~fonts/SF-Pro-Display-SemiboldItalic.otf) format("opentype");
+  font-weight: bold;
+  font-style: italic;
 }
 
 $primary-color: #afe3d7;
