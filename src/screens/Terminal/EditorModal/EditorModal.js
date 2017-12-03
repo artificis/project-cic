@@ -113,11 +113,13 @@ export default class EditorModal extends React.Component {
   }
 
   @autobind
-  handleModalKeyDown() {
+  handleModalKeyDown({ metaKey, ctrlKey }) {
     if (this.state.activeTab === 'edit') {
       this.aceEditor.editor.focus();
     } else {
-      document.getElementById('search_field').focus();
+      if (!metaKey && !ctrlKey) {
+        document.getElementById('search_field').focus();
+      }
     }
   }
 
