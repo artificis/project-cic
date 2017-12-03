@@ -93,6 +93,7 @@ export default class EditorModal extends React.Component {
   @autobind
   handleEditTabClick() {
     this.switchTabTo('edit');
+    this.aceEditor.editor.focus();
   }
 
   @autobind
@@ -114,11 +115,10 @@ export default class EditorModal extends React.Component {
 
   @autobind
   handleModalKeyDown({ metaKey, ctrlKey }) {
-    if (this.state.activeTab === 'edit') {
-      this.aceEditor.editor.focus();
-    } else {
-      if (!metaKey && !ctrlKey) {
-        document.getElementById('search_field').focus();
+    if (this.state.activeTab === 'view') {
+      const searchField = document.getElementById('search_field');
+      if (searchField !== document.activeElement && !metaKey && !ctrlKey) {
+        searchField.focus();
       }
     }
   }
