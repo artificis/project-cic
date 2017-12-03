@@ -5,6 +5,7 @@ import { createStructuredSelector } from 'reselect';
 import shortid from 'shortid';
 import queryString from 'query-string';
 
+import { getLatestAppVersion } from 'services/utils';
 import { getAccessToken } from 'services/auth';
 import {
   terminalLogsSelector, terminalBusyStateSelector, terminalValuePromptModeSelector,
@@ -51,12 +52,13 @@ export default class Terminal extends React.Component {
     inputValue: ''
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     const { location, log } = this.props;
     const qs = queryString.parse(location.search);
     if (Object.keys(qs).length > 0) {
       this.finishLogin(qs);
     } else {
+      await this.checkNewVersion();
       log(`Welcome to Project CIC (v${appInfo.version})`);
       log('&nbsp;');
     }
@@ -82,6 +84,24 @@ export default class Terminal extends React.Component {
   updateUnderscoreCaret(position) {
     this.cmdInputShadow.innerHTML = this.state.inputValue.substr(0, position).replace(/ /g, '&nbsp;');
     this.caret.style.left = `${this.promptLabel.offsetWidth + this.cmdInputShadow.offsetWidth}px`;
+  }
+
+  async checkNewVersion() {
+    const { setTerminalBusy, log } = this.props;
+    setTerminalBusy(true);
+    log('Checking for updates...');
+
+    const latestVersion = await getLatestAppVersion();
+    if (latestVersion === `v${appInfo.version}`) {
+      log('You are using the latest version.');
+    } else {
+      log(`Project CIC ${latestVersion} is now available.`);
+      log(`You have v${appInfo.version}.`);
+      log('Please update by reloading this page. If it does not update after reloading the page, please try again after a few minutes.');
+    }
+
+    log('&nbsp;');
+    setTerminalBusy(false);
   }
 
   finishLogin(qs) {

@@ -1,8 +1,9 @@
+import requestify from 'requestify';
 import sjcl from 'sjcl';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
 import { setModalUiEnabled } from 'services/modal';
 
-const { REACT_APP_SEPARATOR_WORD } = process.env;
+const { REACT_APP_API_BASE_URI, REACT_APP_SEPARATOR_WORD } = process.env;
 const { atob, btoa } = window;
 
 export function withCommonErrorHandling(
@@ -78,3 +79,8 @@ export function filteredCicData(haystack, needle) {
 
   return result;
 };
+
+export async function getLatestAppVersion() {
+  const response = await requestify.get(`${REACT_APP_API_BASE_URI}/latest-version`);
+  return response.getBody();
+}
