@@ -52,18 +52,13 @@ export default class Terminal extends React.Component {
   };
 
   componentDidMount() {
-    const code = this.checkIfOAuthCallback();
-    if (code) {
-      window.location.replace(`/#/?code=${code}`);
+    const { location, log } = this.props;
+    const qs = queryString.parse(location.search);
+    if (Object.keys(qs).length > 0) {
+      this.finishLogin(qs);
     } else {
-      const { location, log } = this.props;
-      const qs = queryString.parse(location.search);
-      if (Object.keys(qs).length > 0) {
-        this.finishLogin(qs);
-      } else {
-        log(`Welcome to Project CIC (v${appInfo.version})`);
-        log('&nbsp;');
-      }
+      log(`Welcome to Project CIC (v${appInfo.version})`);
+      log('&nbsp;');
     }
 
     setTimeout(() => {
@@ -87,15 +82,6 @@ export default class Terminal extends React.Component {
   updateUnderscoreCaret(position) {
     this.cmdInputShadow.innerHTML = this.state.inputValue.substr(0, position).replace(/ /g, '&nbsp;');
     this.caret.style.left = `${this.promptLabel.offsetWidth + this.cmdInputShadow.offsetWidth}px`;
-  }
-
-  checkIfOAuthCallback() {
-    const qs = queryString.parse(window.location.search);
-    if (Object.keys(qs).includes('code')) {
-      return qs.code;
-    } else {
-      return false;
-    }
   }
 
   finishLogin(qs) {
