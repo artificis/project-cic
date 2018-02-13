@@ -6,7 +6,7 @@ import QRCode from 'qrcode.react';
 import {
   qrCodeModalOpenSelector, qrCodeModalDataSelector, closeQrCodeModal
 } from 'services/qrcode-modal';
-import { primaryColor } from 'styles/_base.scss';
+import { terminalPrimary } from 'styles/_variables.css';
 
 const mapStateToProps = createStructuredSelector({
   open: qrCodeModalOpenSelector,
@@ -37,7 +37,7 @@ export default class QrCodeModal extends React.Component {
             value={data}
             size={256}
             bgColor="#000000"
-            fgColor={primaryColor}
+            fgColor={terminalPrimary}
           />
         </ModalBody>
       </Modal>

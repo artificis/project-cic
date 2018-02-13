@@ -20,6 +20,7 @@ import { generateFileContent } from 'services/utils';
 import FaqModal from './FaqModal';
 import TableView from './TableView';
 import QrCodeModal from './QrCodeModal';
+import './EditorModal.css';
 
 import 'brace/mode/json';
 import 'brace/theme/solarized_light';

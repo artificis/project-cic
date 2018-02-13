@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import registerServiceWorker from 'registerServiceWorker';
 import store from 'store';
 import Router from 'screens/router';
-import 'styles/application.scss';
+import 'styles/application.css';
 
 const App = () => (
   <Provider store={store}>

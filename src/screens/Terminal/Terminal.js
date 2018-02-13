@@ -14,6 +14,7 @@ import {
 import evalCommand from './eval-command';
 import EditorModal from './EditorModal';
 import appInfo from 'services/../../package.json';
+import './Terminal.css';
 
 const VK_ENTER = 0x0d;
 const VK_C = 0x43;
@@ -223,7 +224,7 @@ export default class Terminal extends React.Component {
         />
         <p className="invisible position-absolute" ref={e => { this.cmdInputShadow = e; }} />
         <input
-          className="terminal__input"
+          className="terminal__input p-0"
           type={inputType}
           autoFocus
           autoCapitalize="off"
@@ -252,7 +253,7 @@ export default class Terminal extends React.Component {
 
     return (
       <div
-        className="terminal"
+        className="terminal container-fluid p-3"
         ref={e => { this.wrapperEl = e; }}
         onClick={this.handleTerminalClick}
       >
