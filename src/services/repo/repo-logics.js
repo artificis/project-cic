@@ -2,11 +2,11 @@ import { createLogic } from 'redux-logic';
 import GitHubApiClient from 'services/GitHubApiClient';
 import { withCommonErrorHandling } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
+import { spitToTerminal as log } from 'services/terminal';
 import {
   GET_REPOSITORIES, GET_REPOSITORY_TREE,
   setRepositories, setRepositoryTree
-} from 'services/repo';
-import { spitToTerminal as log } from 'services/terminal';
+} from './repo';
 
 const repositoriesLogic = createLogic({
   type: GET_REPOSITORIES,

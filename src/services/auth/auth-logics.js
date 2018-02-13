@@ -2,8 +2,8 @@ import { createLogic } from 'redux-logic';
 import requestify from 'requestify';
 import { history } from 'store';
 import GitHubApiClient from 'services/GitHubApiClient';
-import { GET_ACCESS_TOKEN, setOauthToken, setCurrentUser } from 'services/auth';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
+import { GET_ACCESS_TOKEN, setOauthToken, setCurrentUser } from './auth';
 
 const loginLogic = createLogic({
   type: GET_ACCESS_TOKEN,

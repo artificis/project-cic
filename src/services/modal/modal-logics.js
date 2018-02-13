@@ -2,9 +2,8 @@ import { createLogic } from 'redux-logic';
 import GitHubApiClient from 'services/GitHubApiClient';
 import { withCommonErrorHandling, parseFileContent } from 'services/utils';
 import { authTokenSelector } from 'services/auth';
-import { CREATE_FILE, UPDATE_FILE, GET_FILE_CONTENT, CLOSE_MODAL } from 'services/modal';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
-import { openModal, closeModal, setModalMode, setCicData, setFileShaValue } from 'services/modal';
+import { CREATE_FILE, UPDATE_FILE, GET_FILE_CONTENT, CLOSE_MODAL, openModal, closeModal, setModalMode, setCicData, setFileShaValue } from './modal';
 
 const newFileLogic = createLogic({
   type: CREATE_FILE,
