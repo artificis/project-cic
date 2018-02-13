@@ -254,6 +254,9 @@ export default class EditorModal extends React.Component {
                 className="search-field"
                 placeholder="🔎"
                 id="search_field"
+                autoCapitalize="off"
+                autoComplete="off"
+                autoCorrect="off"
                 value={this.props.searchKeyword}
                 onChange={this.handleSearchFieldChange}
               />

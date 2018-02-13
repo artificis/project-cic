@@ -226,9 +226,9 @@ export default class Terminal extends React.Component {
           className="terminal__input"
           type={inputType}
           autoFocus
+          autoCapitalize="off"
           autoComplete="off"
           autoCorrect="off"
-          spellCheck={false}
           ref={e => { this[refName] = e; }}
           value={this.state.inputValue}
           onChange={this.handleInputChange}
