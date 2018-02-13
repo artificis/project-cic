@@ -5764,9 +5764,9 @@ react-ace@^5.7.0:
     lodash.isequal "^4.1.1"
     prop-types "^15.5.8"
 
-react-app-rewired@^1.3.3:
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/react-app-rewired/-/react-app-rewired-1.3.3.tgz#74aec139c08dcb5520ab7fe2a877c4a6fd2af6ad"
+react-app-rewired@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/react-app-rewired/-/react-app-rewired-1.4.1.tgz#e4cca962590a9893710664728bb5ee02f3976dbe"
   dependencies:
     cross-spawn "^5.1.0"
     dotenv "^4.0.0"
