@@ -64,6 +64,8 @@ export default class Terminal extends React.Component {
       await this.checkNewVersion();
       log(`Welcome to Project CIC (v${appVersion})`);
       log('&nbsp;');
+      log('Type help and hit Enter to list available commands.');
+      log('&nbsp;');
     }
 
     setTimeout(() => {
