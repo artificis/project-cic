@@ -3,20 +3,23 @@
 const path = require('path');
 
 module.exports = (config, env) => {
-  config.resolve.modules.push(path.resolve('./src'));
+  const c = { ...config };
+  const postcssLoaderOptions = {
+    config: {
+      path: path.resolve('./.postcssrc')
+    }
+  };
 
-  const moduleRulesOneOfArrayLength = config.module.rules[1].oneOf.length;
-  config.module.rules[1].oneOf[moduleRulesOneOfArrayLength - 1].exclude.push(/\.scss$/);
-  config.module.rules[1].oneOf.push({
-    test: /\.scss$/,
-    use: [
-      { loader: require.resolve('style-loader') },
-      { loader: require.resolve('css-loader') },
-      { loader: require.resolve('sass-loader') }
-    ]
-  });
+  c.resolve.modules.push(path.resolve('./src'));
+  c.module.rules[0].use[0].options.useEslintrc = true;
+  delete c.module.rules[1].oneOf[1].options.babelrc;
+  delete c.module.rules[1].oneOf[1].options.presets;
 
-  config.module.rules[1].oneOf[1].options.plugins = ['transform-decorators-legacy'];
+  if (env === 'production') {
+    c.module.rules[1].oneOf[2].loader[3].options = postcssLoaderOptions;
+  } else {
+    c.module.rules[1].oneOf[2].use[2].options = postcssLoaderOptions;
+  }
   
-  return config;
+  return c;
 };

@@ -1,2 +1,1 @@
-import EditorModal from './EditorModal';
-export default EditorModal;
+module.exports = require('./EditorModal');

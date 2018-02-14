@@ -1,0 +1,10 @@
+{
+  "plugins": {
+    "postcss-import": {
+      "path": ["src"]
+    },
+    "precss": {},
+    "postcss-cssnext": {},
+    "postcss-flexbugs-fixes": {}
+  }
+}

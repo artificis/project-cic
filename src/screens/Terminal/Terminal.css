@@ -1,0 +1,45 @@
+@import "styles/_variables";
+
+$line-height: 1.4rem;
+
+.terminal {
+  min-height: 100vh;
+
+  p {
+    line-height: $line-height;
+    margin-bottom: 0;
+  }
+
+  &__input {
+    background: none;
+    border: none;
+    flex-grow: 1;
+    height: $line-height;
+    margin-top: -1px;
+    
+    &:focus {
+      outline: none;
+      + .terminal__caret span {
+        animation: blinker 0.7s cubic-bezier(0.42, 0, 0.58, 1) infinite alternate;
+      }
+    }
+  }
+
+  &__caret {
+    height: $line-height;
+    padding-top: 3px;
+
+    &::before {
+      background: $dark;
+      content: "";
+      height: $line-height;
+      position: absolute;
+      top: 0;
+      width: 1px;
+    }
+  }
+}
+
+@keyframes blinker {
+  50% { opacity: 0; }
+}

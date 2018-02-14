@@ -4,16 +4,19 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import shortid from 'shortid';
 import queryString from 'query-string';
-
-import { getLatestAppVersion } from 'services/utils';
+import { appVersion, getLatestAppVersion } from 'utils/info';
 import { getAccessToken } from 'services/auth';
 import {
-  terminalLogsSelector, terminalBusyStateSelector, terminalValuePromptModeSelector,
-  resetTerminalValuePromptMode, setTerminalBusy, spitToTerminal as log
+  terminalLogsSelector,
+  terminalBusyStateSelector,
+  terminalValuePromptModeSelector,
+  resetTerminalValuePromptMode,
+  setTerminalBusy,
+  spitToTerminal
 } from 'services/terminal';
 import evalCommand from './eval-command';
 import EditorModal from './EditorModal';
-import appInfo from 'services/../../package.json';
+import './Terminal.css';
 
 const VK_ENTER = 0x0d;
 const VK_C = 0x43;
@@ -40,7 +43,7 @@ const mapStateToProps = createStructuredSelector({
 });
 
 const mapDispatchToProps = {
-  log,
+  spitToTerminal,
   setTerminalBusy,
   resetTerminalValuePromptMode,
   getAccessToken
@@ -53,28 +56,32 @@ export default class Terminal extends React.Component {
   };
 
   async componentDidMount() {
-    const { location, log } = this.props;
+    const { location, spitToTerminal: log } = this.props;
     const qs = queryString.parse(location.search);
     if (Object.keys(qs).length > 0) {
       this.finishLogin(qs);
     } else {
       await this.checkNewVersion();
-      log(`Welcome to Project CIC (v${appInfo.version})`);
+      log(`Welcome to Project CIC (v${appVersion})`);
       log('&nbsp;');
     }
 
     setTimeout(() => {
       if (this.caret) {
-        this.caret.style.left = `${this.promptLabel.offsetWidth + this.cmdInputShadow.offsetWidth}px`;
+        this.caret.style.left = `${this.promptLabel.offsetWidth +
+          this.cmdInputShadow.offsetWidth}px`;
       }
     }, 1);
   }
 
   componentDidUpdate(prevProps, prevState) {
-    const promptInputRef = this.props.valuePromptMode.on ? 'valuePromptInput' : 'commandPromptInput';
+    const promptInputRef = this.props.valuePromptMode.on
+      ? 'valuePromptInput'
+      : 'commandPromptInput';
     if (
       this[promptInputRef] &&
-      (prevState.inputValue !== this.state.inputValue || (prevProps.isBusy && !this.props.isBusy))
+      (prevState.inputValue !== this.state.inputValue ||
+        (prevProps.isBusy && !this.props.isBusy))
     ) {
       this.updateUnderscoreCaret(this[promptInputRef].selectionStart);
     }
@@ -82,35 +89,40 @@ export default class Terminal extends React.Component {
   }
 
   updateUnderscoreCaret(position) {
-    this.cmdInputShadow.innerHTML = this.state.inputValue.substr(0, position).replace(/ /g, '&nbsp;');
-    this.caret.style.left = `${this.promptLabel.offsetWidth + this.cmdInputShadow.offsetWidth}px`;
+    this.cmdInputShadow.innerHTML = this.state.inputValue
+      .substr(0, position)
+      .replace(/ /g, '&nbsp;');
+    this.caret.style.left = `${this.promptLabel.offsetWidth +
+      this.cmdInputShadow.offsetWidth}px`;
   }
 
   async checkNewVersion() {
-    const { setTerminalBusy, log } = this.props;
-    setTerminalBusy(true);
+    const { spitToTerminal: log } = this.props;
+    this.props.setTerminalBusy(true);
     log('Checking for updates...');
 
     const latestVersion = await getLatestAppVersion();
-    if (latestVersion === `v${appInfo.version}`) {
+    if (latestVersion === `v${appVersion}`) {
       log('You are using the latest version.');
     } else {
       log(`Project CIC ${latestVersion} is now available.`);
-      log(`You have v${appInfo.version}.`);
-      log('Please update by reloading this page. If it does not update after reloading the page, please try again after a few minutes.');
+      log(`You have v${appVersion}.`);
+      log(
+        'Please update by reloading this page. If it does not update after reloading the page, please try again after a few minutes.'
+      );
     }
 
     log('&nbsp;');
-    setTerminalBusy(false);
+    this.props.setTerminalBusy(false);
   }
 
   finishLogin(qs) {
-    const { log, getAccessToken } = this.props;
+    const { spitToTerminal: log } = this.props;
     log('Signing in...');
     log('Looking for OAuth code...');
     if (Object.keys(qs).includes('code')) {
       log('OAuth code found');
-      getAccessToken(qs.code);
+      this.props.getAccessToken(qs.code);
     } else {
       log('OAuth code not found!');
       log(JSON.stringify(qs));
@@ -141,7 +153,10 @@ export default class Terminal extends React.Component {
       this.onPressEnter();
     } else if (keyCode === VK_C && ctrlKey && !metaKey) {
       this.onPressCancel();
-    } else if (Object.keys(charactersWithShiftKey).includes(keyCode.toString()) && shiftKey) {
+    } else if (
+      Object.keys(charactersWithShiftKey).includes(keyCode.toString()) &&
+      shiftKey
+    ) {
       const caretPos = target.selectionStart;
       const inputValueChars = inputValue.split('');
       inputValueChars.splice(caretPos, 0, charactersWithShiftKey[keyCode]);
@@ -165,14 +180,16 @@ export default class Terminal extends React.Component {
 
   onPressEnter() {
     const { inputValue } = this.state;
-    const { valuePromptMode, log, setTerminalBusy, resetTerminalValuePromptMode } = this.props;
+    const { valuePromptMode, spitToTerminal: log } = this.props;
 
     this.setState({ inputValue: '' });
 
     if (valuePromptMode.on) {
-      const valueDisplayText = valuePromptMode.passwordMode ? '' : inputValue.replace(/ /g, '&nbsp;');
+      const valueDisplayText = valuePromptMode.passwordMode
+        ? ''
+        : inputValue.replace(/ /g, '&nbsp;');
       log(`${valuePromptMode.promptLabel}${valueDisplayText}`);
-      resetTerminalValuePromptMode();
+      this.props.resetTerminalValuePromptMode();
       if (typeof valuePromptMode.onConfirm === 'function') {
         valuePromptMode.onConfirm(inputValue);
       }
@@ -180,10 +197,10 @@ export default class Terminal extends React.Component {
       const input = inputValue.trim();
       log(`${commandPromptSymbol}${inputValue.replace(/ /g, '&nbsp;')}`);
       if (input !== '') {
-        setTerminalBusy(true);
+        this.props.setTerminalBusy(true);
         if (evalCommand(input, log)) {
           log('&nbsp;');
-          setTerminalBusy(false);
+          this.props.setTerminalBusy(false);
         }
       }
     }
@@ -191,16 +208,18 @@ export default class Terminal extends React.Component {
 
   onPressCancel() {
     const { inputValue } = this.state;
-    const { valuePromptMode, log, setTerminalBusy, resetTerminalValuePromptMode } = this.props;
+    const { valuePromptMode, spitToTerminal: log } = this.props;
 
     this.setState({ inputValue: '' });
     const frozenText = valuePromptMode.on
-      ? `${valuePromptMode.promptLabel}${valuePromptMode.passwordMode ? '' : inputValue.replace(/ /g, '&nbsp;')}`
+      ? `${valuePromptMode.promptLabel}${
+          valuePromptMode.passwordMode ? '' : inputValue.replace(/ /g, '&nbsp;')
+        }`
       : `${commandPromptSymbol}${inputValue.replace(/ /g, '&nbsp;')}`;
     log(`${frozenText}^C`);
     log('&nbsp;');
-    setTerminalBusy(false);
-    resetTerminalValuePromptMode();
+    this.props.setTerminalBusy(false);
+    this.props.resetTerminalValuePromptMode();
   }
 
   getPromptComponent(isValuePrompt = false) {
@@ -210,7 +229,7 @@ export default class Terminal extends React.Component {
     let refName = 'commandPromptInput';
 
     if (isValuePrompt) {
-      promptLabel = valuePromptMode.promptLabel;
+      ({ promptLabel } = valuePromptMode);
       inputType = valuePromptMode.passwordMode ? 'password' : 'text';
       refName = 'valuePromptInput';
     }
@@ -219,24 +238,36 @@ export default class Terminal extends React.Component {
       <div className="position-relative d-flex align-items-center">
         <p
           dangerouslySetInnerHTML={{ __html: promptLabel }}
-          ref={e => { this.promptLabel = e; }}
+          ref={e => {
+            this.promptLabel = e;
+          }}
         />
-        <p className="invisible position-absolute" ref={e => { this.cmdInputShadow = e; }} />
+        <p
+          className="invisible position-absolute"
+          ref={e => {
+            this.cmdInputShadow = e;
+          }}
+        />
         <input
-          className="terminal__input"
+          className="terminal__input p-0"
           type={inputType}
           autoFocus
           autoCapitalize="off"
           autoComplete="off"
           autoCorrect="off"
-          ref={e => { this[refName] = e; }}
+          spellCheck={false}
+          ref={e => {
+            this[refName] = e;
+          }}
           value={this.state.inputValue}
           onChange={this.handleInputChange}
           onKeyDown={this.handleKeyDown}
         />
         <span
           className="position-absolute terminal__caret"
-          ref={e => { this.caret = e; }}
+          ref={e => {
+            this.caret = e;
+          }}
         >
           <span>_</span>
         </span>
@@ -246,17 +277,27 @@ export default class Terminal extends React.Component {
   }
 
   render() {
-    const { logs, isBusy, valuePromptMode } = this.props;
-    const commandPromptEl = isBusy || valuePromptMode.on ? null : this.getPromptComponent();
-    const valuePromptEl = valuePromptMode.on ? this.getPromptComponent(true) : null;
+    const { isBusy, valuePromptMode, logs } = this.props;
+    const commandPromptEl =
+      isBusy || valuePromptMode.on ? null : this.getPromptComponent();
+    const valuePromptEl = valuePromptMode.on
+      ? this.getPromptComponent(true)
+      : null;
 
     return (
       <div
-        className="terminal"
-        ref={e => { this.wrapperEl = e; }}
+        className="terminal container-fluid p-3"
+        ref={e => {
+          this.wrapperEl = e;
+        }}
         onClick={this.handleTerminalClick}
       >
-        {logs.map(log => <p key={shortid.generate()} dangerouslySetInnerHTML={{ __html: log }} />)}
+        {logs.map(log => (
+          <p
+            key={shortid.generate()}
+            dangerouslySetInnerHTML={{ __html: log }}
+          />
+        ))}
         {commandPromptEl}
         {valuePromptEl}
         <EditorModal />

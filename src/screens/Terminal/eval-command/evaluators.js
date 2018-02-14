@@ -1,9 +1,12 @@
 import { createStructuredSelector } from 'reselect';
 import store from 'store';
+import { GITHUB_OAUTH_URL } from 'utils/github-api-client';
+import { appVersion } from 'utils/info';
 import {
-  GITHUB_OAUTH_URL,
-  authenticatedSelector, currentUserSelector,
-  setOauthToken, setCurrentUser
+  authenticatedSelector,
+  currentUserSelector,
+  setOauthToken,
+  setCurrentUser
 } from 'services/auth';
 import { setTerminalBusy, setTerminalValuePromptMode } from 'services/terminal';
 import {
@@ -11,6 +14,7 @@ import {
   currentRepositorySelector,
   currentRepositoryTreeSelector,
   currentRepositoryPathSelector,
+  currentRepositoryRefShaSelector,
   getRepositories,
   setRepositories,
   setCurrentRepository,
@@ -19,11 +23,9 @@ import {
   setCurrentRepositoryPath
 } from 'services/repo';
 import { openModal, getFileContent, setMasterKey } from 'services/modal';
-import appInfo from 'services/../../package.json';
 import { command, requiresAuth } from './decorators';
 
 const { getState, dispatch } = store;
-const state = () => selector(getState());
 const joinPath = (...parts) => parts.join('/').replace(/^\//, '');
 const selector = createStructuredSelector({
   loggedIn: authenticatedSelector,
@@ -31,8 +33,10 @@ const selector = createStructuredSelector({
   repositories: repositoriesSelector,
   currentRepository: currentRepositorySelector,
   currentRepoTree: currentRepositoryTreeSelector,
-  currentRepoPath: currentRepositoryPathSelector
+  currentRepoPath: currentRepositoryPathSelector,
+  currentRepositoryRefSHA: currentRepositoryRefShaSelector
 });
+const state = () => selector(getState());
 
 class Command {
   static commands = {};
@@ -41,10 +45,20 @@ class Command {
   @command()
   static help({ log }) {
     log('&nbsp;');
-    const maxCmdLength = Math.max(...Object.keys(this.commandDescriptions).map(e => e.length));
-    for (let [cmd, desc] of Object.entries(this.commandDescriptions)) {
-      if (cmd === 'help') continue;
-      log(`${cmd.padEnd(maxCmdLength + 3).replace(/ /g, '&nbsp;')}<span class="text-light">${desc}</span>`);
+    const maxCmdLength = Math.max(
+      ...Object.keys(this.commandDescriptions).map(e => e.length)
+    );
+    const commandDescriptions = Object.entries(this.commandDescriptions);
+    for (let i = 0, n = commandDescriptions.length; i < n; i += 1) {
+      const [cmd, desc] = commandDescriptions[i];
+      if (cmd !== 'help') {
+        log(
+          `${cmd
+            .padEnd(maxCmdLength + 3)
+            .replace(/ /g, '&nbsp;')}<span class="text-light">${desc}</span>
+          `
+        );
+      }
     }
     return true;
   }
@@ -55,11 +69,10 @@ class Command {
     if (loggedIn) {
       log('You are already signed in.');
       return true;
-    } else {
-      log('Signing in...');
-      setTimeout(() => window.location.assign(GITHUB_OAUTH_URL), 1000);
-      return false;
     }
+    log('Signing in...');
+    setTimeout(() => window.location.assign(GITHUB_OAUTH_URL), 1000);
+    return false;
   }
 
   @command("show current user's username")
@@ -86,10 +99,12 @@ class Command {
   }
 
   static lsRepositoryTree(currentRepository, currentRepoPath) {
-    dispatch(getRepositoryTree({
-      repoName: currentRepository.name,
-      repoTreePath: currentRepoPath
-    }));
+    dispatch(
+      getRepositoryTree({
+        repoName: currentRepository.name,
+        repoTreePath: currentRepoPath
+      })
+    );
   }
 
   @command('get into repository or repository tree folder')
@@ -101,9 +116,8 @@ class Command {
       return this.cdUpwards();
     } else if (state().currentRepository) {
       return this.cdIntoRepositoryTree(args[0], log);
-    } else {
-      return this.cdIntoRepository(args[0], log);
     }
+    return this.cdIntoRepository(args[0], log);
   }
 
   static cdToRoot() {
@@ -136,9 +150,13 @@ class Command {
 
   static cdIntoRepositoryTree(folderName, log) {
     const { currentRepoTree, currentRepoPath } = state();
-    const folder = currentRepoTree.find(e => e.name === folderName && e.type === 'tree');
+    const folder = currentRepoTree.find(
+      e => e.name === folderName && e.type === 'tree'
+    );
     if (folder) {
-      dispatch(setCurrentRepositoryPath(joinPath(currentRepoPath, folder.name)));
+      dispatch(
+        setCurrentRepositoryPath(joinPath(currentRepoPath, folder.name))
+      );
     } else {
       log(`cd: no such directory: ${folderName}`);
     }
@@ -156,53 +174,57 @@ class Command {
     return true;
   }
 
-  @command('prepare a new CIC file with specified image and open a modal', 'new')
+  @command(
+    'prepare a new CIC file with specified image and open a modal',
+    'new'
+  )
   @requiresAuth
-  static newFile({ args, log }) {
-    const { currentRepository, currentRepoPath } = state();
-    if (args.length === 0) {
-      log('usage:');
-      log('new &lt;filename&gt;');
-    } else if (currentRepository === null) {
+  static newFile({ log }) {
+    const { currentRepository } = state();
+    if (currentRepository === null) {
       log('new: you are currently not inside a repository');
-    } else if (this.fileExists(args[0])) {
-      log(`new: file already exists: ${args[0]}`);
+    } else if (this.fileExists()) {
+      log('new: file already exists');
     } else {
-      this.promptToCreateMasterKey(joinPath(currentRepoPath, args[0]), log);
+      this.promptToCreateMasterKey(log);
       return false;
     }
     return true;
   }
 
-  static fileExists(fileName) {
-    const { currentRepoTree } = state();
-    return currentRepoTree.find(e => e.name === fileName);
+  static fileExists() {
+    const { currentRepositoryRefSHA } = state();
+    return currentRepositoryRefSHA !== null;
   }
 
-  static promptToCreateMasterKey(filePath, log) {
-    dispatch(setTerminalValuePromptMode({
-      passwordMode: true,
-      promptLabel: 'Set master password:&nbsp;',
-      onConfirm: masterKey => {
-        dispatch(setTerminalValuePromptMode({
-          passwordMode: true,
-          promptLabel: 'Enter same master password again:&nbsp;',
-          onConfirm: masterKeyConfirmation => {
-            if (masterKey === masterKeyConfirmation) {
-              dispatch(setMasterKey(masterKey));
-              dispatch(setTerminalBusy(false));
-              this.openNewImageFileDialog(filePath, log);
-            } else {
-              log('Master passwords do not match. Try again.');
-              this.promptToCreateMasterKey(filePath, log);
-            }
-          }
-        }));
-      }
-    }));
+  static promptToCreateMasterKey(log) {
+    dispatch(
+      setTerminalValuePromptMode({
+        passwordMode: true,
+        promptLabel: 'Set master password:&nbsp;',
+        onConfirm: masterKey => {
+          dispatch(
+            setTerminalValuePromptMode({
+              passwordMode: true,
+              promptLabel: 'Enter same master password again:&nbsp;',
+              onConfirm: masterKeyConfirmation => {
+                if (masterKey === masterKeyConfirmation) {
+                  dispatch(setMasterKey(masterKey));
+                  dispatch(setTerminalBusy(false));
+                  this.openNewImageFileDialog(log);
+                } else {
+                  log('Master passwords do not match. Try again.');
+                  this.promptToCreateMasterKey(log);
+                }
+              }
+            })
+          );
+        }
+      })
+    );
   }
 
-  static openNewImageFileDialog(filePath, log) {
+  static openNewImageFileDialog(log) {
     const fileInput = document.createElement('input');
     log('Please choose an image file');
     log('&nbsp;');
@@ -215,12 +237,7 @@ class Command {
           const imageBlob = atob(reader.result.split(',')[1]);
           log('Image file read');
           log('Entering edit/view mode...');
-          dispatch(openModal({
-            imageBlob,
-            filePath,
-            fileShaValue: null,
-            mode: 'create'
-          }));
+          dispatch(openModal({ imageBlob }));
         };
         dispatch(setTerminalBusy(true));
         log('Reading image file...');
@@ -232,29 +249,22 @@ class Command {
 
   @command('open an existing CIC file')
   @requiresAuth
-  static open({ args, log }) {
-    const { currentRepository, currentRepoTree, currentRepoPath } = state();
-    if (args.length === 0) {
-      log('usage:');
-      log('open &lt;filename&gt;');
-    } else if (currentRepository === null) {
+  static open({ log }) {
+    const { currentRepository } = state();
+    if (currentRepository === null) {
       log('open: you are currently not inside a repository');
-    } else if (currentRepoTree.find(e => e.name === args[0] && e.type !== 'tree')) {
-      dispatch(setTerminalValuePromptMode({
-        passwordMode: true,
-        promptLabel: 'Enter master password:&nbsp;',
-        onConfirm: masterKey => {
-          dispatch(setMasterKey(masterKey));
-          dispatch(getFileContent({
-            masterKey,
-            repoResourcePath: currentRepository.resourcePath,
-            filePath: joinPath(currentRepoPath, args[0])
-          }));
-        }
-      }));
-      return false;
     } else {
-      log(`open: no such file: ${args[0]}`);
+      dispatch(
+        setTerminalValuePromptMode({
+          passwordMode: true,
+          promptLabel: 'Enter master password:&nbsp;',
+          onConfirm: masterKey => {
+            dispatch(setMasterKey(masterKey));
+            dispatch(getFileContent({ masterKey }));
+          }
+        })
+      );
+      return false;
     }
     return true;
   }
@@ -273,7 +283,7 @@ class Command {
 
   @command('show version number')
   static version({ log }) {
-    log(`Project CIC v${appInfo.version} [${window.navigator.userAgent}]`);
+    log(`Project CIC v${appVersion} [${window.navigator.userAgent}]`);
     return true;
   }
 }
