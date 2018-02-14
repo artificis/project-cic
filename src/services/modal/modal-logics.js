@@ -1,9 +1,9 @@
 import { createLogic } from 'redux-logic';
+import { logFunction, withCommonErrorHandling } from 'utils';
 import GitHubApiClient from 'utils/github-api-client';
-import { withCommonErrorHandling } from 'utils';
 import { parseFileContent } from 'utils/cic-contents';
 import { authTokenSelector } from 'services/auth';
-import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
+import { setTerminalBusy } from 'services/terminal';
 import {
   CREATE_FILE,
   UPDATE_FILE,
@@ -20,24 +20,21 @@ const newFileLogic = createLogic({
   type: CREATE_FILE,
   process: withCommonErrorHandling(
     async ({ getState, action: { payload } }, dispatch) => {
+      const log = logFunction(dispatch);
       const client = new GitHubApiClient(authTokenSelector(getState()));
-      dispatch(log('Creating a new file...'));
+      log('Creating a new file...');
       const { repoResourcePath, filePath, options } = payload;
       const res = await client.createFile(repoResourcePath, filePath, options);
       const body = res.getBody();
 
-      dispatch(log('New file created'));
+      log('New file created');
       dispatch(setModalMode('update'));
       dispatch(setFileShaValue(body.content.sha));
-
       if (payload.closeModalAfterSave) {
         dispatch(closeModal());
       }
     },
-    {},
-    {
-      callSetTerminalBusy: false
-    }
+    { callSetTerminalBusy: false }
   )
 });
 
@@ -45,23 +42,20 @@ const fileUpdateLogic = createLogic({
   type: UPDATE_FILE,
   process: withCommonErrorHandling(
     async ({ getState, action: { payload } }, dispatch) => {
+      const log = logFunction(dispatch);
       const client = new GitHubApiClient(authTokenSelector(getState()));
-      dispatch(log('Updating file...'));
+      log('Updating file...');
       const { repoResourcePath, filePath, options } = payload;
       const res = await client.updateFile(repoResourcePath, filePath, options);
       const body = res.getBody();
 
-      dispatch(log('File updated'));
+      log('File updated');
       dispatch(setFileShaValue(body.content.sha));
-
       if (payload.closeModalAfterSave) {
         dispatch(closeModal());
       }
     },
-    {},
-    {
-      callSetTerminalBusy: false
-    }
+    { callSetTerminalBusy: false }
   )
 });
 
@@ -69,8 +63,9 @@ const fileReadLogic = createLogic({
   type: GET_FILE_CONTENT,
   process: withCommonErrorHandling(
     async ({ getState, action: { payload } }, dispatch) => {
+      const log = logFunction(dispatch);
       const client = new GitHubApiClient(authTokenSelector(getState()));
-      dispatch(log('Pulling file...'));
+      log('Pulling file...');
       const { repoResourcePath, filePath, masterKey } = payload;
       const res = await client.getFileContent(repoResourcePath, filePath);
       const body = res.getBody();
@@ -78,7 +73,7 @@ const fileReadLogic = createLogic({
 
       if (cicData) {
         dispatch(setCicData(cicData));
-        dispatch(log('Entering edit/view mode...'));
+        log('Entering edit/view mode...');
         dispatch(
           openModal({
             imageBlob,
@@ -88,27 +83,21 @@ const fileReadLogic = createLogic({
           })
         );
       } else {
-        dispatch(
-          log(
-            `open: not a valid CIC file or incorrect master key: ${body.name}`
-          )
-        );
-        dispatch(log('&nbsp;'));
+        log(`open: not a valid CIC file or incorrect master key: ${body.name}`);
+        log('&nbsp;');
         dispatch(setTerminalBusy(false));
       }
     },
-    {},
-    {
-      callSetTerminalBusy: false
-    }
+    { callSetTerminalBusy: false }
   )
 });
 
 const modalCloseLogic = createLogic({
   type: CLOSE_MODAL,
   process: (depObj, dispatch, done) => {
-    dispatch(log('Exiting from edit/view mode...'));
-    dispatch(log('&nbsp;'));
+    const log = logFunction(dispatch);
+    log('Exiting from edit/view mode...');
+    log('&nbsp;');
     dispatch(setTerminalBusy(false));
     done();
   }

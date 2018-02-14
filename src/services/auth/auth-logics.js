@@ -1,8 +1,9 @@
 import { createLogic } from 'redux-logic';
 import requestify from 'requestify';
 import { history } from 'store';
+import { logFunction } from 'utils';
 import GitHubApiClient from 'utils/github-api-client';
-import { setTerminalBusy, spitToTerminal } from 'services/terminal';
+import { setTerminalBusy } from 'services/terminal';
 import { GET_ACCESS_TOKEN, setOauthToken, setCurrentUser } from './auth';
 
 const { REACT_APP_API_BASE_URI: API_BASE_URI } = process.env;
@@ -10,7 +11,7 @@ const { REACT_APP_API_BASE_URI: API_BASE_URI } = process.env;
 const loginLogic = createLogic({
   type: GET_ACCESS_TOKEN,
   process: async ({ action: { payload } }, dispatch, done) => {
-    const log = contents => dispatch(spitToTerminal(contents));
+    const log = logFunction(dispatch);
     try {
       dispatch(setTerminalBusy(true));
       log('Verifying OAuth code...');

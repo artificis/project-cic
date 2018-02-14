@@ -1,8 +1,7 @@
 import { createLogic } from 'redux-logic';
 import GitHubApiClient from 'utils/github-api-client';
-import { withCommonErrorHandling } from 'utils';
+import { logFunction, withCommonErrorHandling } from 'utils';
 import { authTokenSelector } from 'services/auth';
-import { spitToTerminal as log } from 'services/terminal';
 import {
   GET_REPOSITORIES,
   GET_REPOSITORY_TREE,
@@ -13,14 +12,14 @@ import {
 const repositoriesLogic = createLogic({
   type: GET_REPOSITORIES,
   process: withCommonErrorHandling(async ({ getState }, dispatch) => {
+    const log = logFunction(dispatch);
     const client = new GitHubApiClient(authTokenSelector(getState()));
-    dispatch(log('Pulling repositories...'));
+    log('Pulling repositories...');
     const repositories = await client.repositories();
-
-    dispatch(log('&nbsp;'));
+    log('&nbsp;');
     dispatch(setRepositories(repositories));
     repositories.forEach(repository => {
-      dispatch(log(`<span class="text-info">${repository.name}</span>`));
+      log(`<span class="text-info">${repository.name}</span>`);
     });
   })
 });
@@ -29,24 +28,23 @@ const repositoryTreeLogic = createLogic({
   type: GET_REPOSITORY_TREE,
   process: withCommonErrorHandling(
     async ({ getState, action: { payload } }, dispatch) => {
+      const log = logFunction(dispatch);
       const client = new GitHubApiClient(authTokenSelector(getState()));
-      dispatch(log('Pulling repository tree...'));
+      log('Pulling repository tree...');
       const { repoName, repoTreePath } = payload;
       const entries = await client.treeEntries(repoName, repoTreePath);
 
       if (entries.length === 0) {
-        return dispatch(log(`repository ${repoName} is empty`));
+        return log(`repository ${repoName} is empty`);
       }
 
-      dispatch(log('&nbsp;'));
+      log('&nbsp;');
       dispatch(setRepositoryTree(entries));
       return entries.forEach(entry => {
-        dispatch(
-          log(
-            entry.type === 'tree'
-              ? `<span class="text-info">${entry.name}</span>`
-              : entry.name
-          )
+        log(
+          entry.type === 'tree'
+            ? `<span class="text-info">${entry.name}</span>`
+            : entry.name
         );
       });
     }
