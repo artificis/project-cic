@@ -255,6 +255,7 @@ export default class Terminal extends React.Component {
           autoCapitalize="off"
           autoComplete="off"
           autoCorrect="off"
+          spellCheck={false}
           ref={e => {
             this[refName] = e;
           }}
