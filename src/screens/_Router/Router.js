@@ -4,10 +4,8 @@ import { Route } from 'react-router-dom';
 import { history } from 'store';
 import Terminal from 'screens/Terminal';
 
-export default () => (
-  <ConnectedRouter history={history}>
-    <div>
-      <Route exact path="/" component={Terminal} />
-    </div>
-  </ConnectedRouter>
-);
+export default () => pug`
+  ConnectedRouter(history=history)
+    div
+      Route(exact path="/" component=Terminal)
+`;

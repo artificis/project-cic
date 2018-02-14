@@ -21,14 +21,10 @@ const contents = `
   \`\`\`
 `;
 
-export default ({ isOpen, onToggle }) => (
-  <Modal isOpen={isOpen} toggle={onToggle} size="lg">
-    <ModalHeader>CIC Data Format</ModalHeader>
-    <ModalBody dangerouslySetInnerHTML={{ __html: marked(contents) }} />
-    <ModalFooter>
-      <Button color="primary" size="sm" onClick={onToggle}>
-        Close
-      </Button>
-    </ModalFooter>
-  </Modal>
-);
+export default ({ isOpen, onToggle }) => pug`
+  Modal(isOpen=isOpen toggle=onToggle size="lg")
+    ModalHeader CIC Data Format
+    ModalBody(dangerouslySetInnerHTML={ __html: marked(contents) })
+    ModalFooter
+      Button(color="primary" size="sm" onClick=onToggle) Close
+`;

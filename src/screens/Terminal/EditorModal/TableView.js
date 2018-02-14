@@ -30,52 +30,46 @@ export default class TableView extends React.Component {
   render() {
     const { cicData } = this.props;
 
-    return Object.keys(cicData).map(category => (
-      <Table
-        key={shortid.generate()}
-        striped
-        bordered
-        className="cic-data-table"
-      >
-        <caption>{category}</caption>
-        <thead>
-          <tr>
-            <th>Service Provider</th>
-            <th>Login</th>
-            <th>Password</th>
-            <th>Associated Email</th>
-            <th>Notes</th>
-            <th />
-          </tr>
-        </thead>
-        <tbody>
-          {cicData[category].map(row => (
-            <tr key={shortid.generate()}>
-              <td dangerouslySetInnerHTML={{ __html: marked(row[0]) }} />
-              <td
-                dangerouslySetInnerHTML={{ __html: marked(row[1]) }}
-                onClick={this.selectWholeText}
-              />
-              <td onClick={this.selectWholeText}>{row[2]}</td>
-              <td>{row[3]}</td>
-              <td dangerouslySetInnerHTML={{ __html: marked(row[4]) }} />
-              <td>
-                <Button
-                  size="sm"
-                  color="secondary"
-                  outline
-                  title="Show QR code"
-                  onClick={() => this.handleQrCodeButtonClick(row[2])}
-                >
-                  <span role="img" aria-label="Show QR code">
-                    📱
-                  </span>
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-    ));
+    return Object.keys(cicData).map(
+      category => pug`
+        Table.cic-data-table(
+          key=shortid.generate()
+          striped=true
+          bordered=true
+        )
+          caption= category
+          thead
+            tr
+              th Service Provider
+              th Login
+              th Password
+              th Associated Email
+              th Notes
+              th
+          tbody
+            ${cicData[category].map(
+              row => pug`
+                tr(key=shortid.generate())
+                  td(dangerouslySetInnerHTML={ __html: marked(row[0]) })
+                  td(
+                    dangerouslySetInnerHTML={ __html: marked(row[1]) }
+                    onClick=this.selectWholeText
+                  )
+                  td(onClick=this.selectWholeText)= row[2]
+                  td= row[3]
+                  td(dangerouslySetInnerHTML={ __html: marked(row[4]) })
+                  td
+                    Button(
+                      size="sm"
+                      color="secondary"
+                      outline=true
+                      title="Show QR code"
+                      onClick=${() => this.handleQrCodeButtonClick(row[2])}
+                    )
+                      span(role="img" aria-label="Show QR code") 📱
+              `
+            )}
+      `
+    );
   }
 }

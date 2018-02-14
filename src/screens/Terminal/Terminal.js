@@ -236,46 +236,41 @@ export default class Terminal extends React.Component {
       refName = 'valuePromptInput';
     }
 
-    return (
-      <div className="position-relative d-flex align-items-center">
-        <p
-          dangerouslySetInnerHTML={{ __html: promptLabel }}
-          ref={e => {
+    return pug`
+      .position-relative.d-flex.align-items-center
+        p(
+          dangerouslySetInnerHTML={ __html: promptLabel }
+          ref=${e => {
             this.promptLabel = e;
           }}
-        />
-        <p
-          className="invisible position-absolute"
-          ref={e => {
+        )
+        p.invisible.position-absolute(
+          ref=${e => {
             this.cmdInputShadow = e;
           }}
-        />
-        <input
-          className="terminal__input p-0"
-          type={inputType}
-          autoFocus
+        )
+        input.terminal__input.p-0(
+          type=inputType
+          autoFocus=true
           autoCapitalize="off"
           autoComplete="off"
           autoCorrect="off"
-          spellCheck={false}
-          ref={e => {
+          spellCheck="false"
+          ref=${e => {
             this[refName] = e;
           }}
-          value={this.state.inputValue}
-          onChange={this.handleInputChange}
-          onKeyDown={this.handleKeyDown}
-        />
-        <span
-          className="position-absolute terminal__caret"
-          ref={e => {
+          value=this.state.inputValue
+          onChange=this.handleInputChange
+          onKeyDown=this.handleKeyDown
+        )
+        span.position-absolute.terminal__caret(
+          ref=${e => {
             this.caret = e;
           }}
-        >
-          <span>&nbsp;</span>
-        </span>
-        <p className="position-absolute w-100">&nbsp;</p>
-      </div>
-    );
+        )
+          span(dangerouslySetInnerHTML={ __html: '&nbsp;' })
+        p.position-absolute.w-100(dangerouslySetInnerHTML={ __html: '&nbsp;' })
+    `;
   }
 
   render() {
@@ -286,24 +281,21 @@ export default class Terminal extends React.Component {
       ? this.getPromptComponent(true)
       : null;
 
-    return (
-      <div
-        className="terminal container-fluid p-3"
-        ref={e => {
+    return pug`
+      .terminal.container-fluid.p-3(
+        ref=${e => {
           this.wrapperEl = e;
         }}
-        onClick={this.handleTerminalClick}
-      >
-        {logs.map(log => (
-          <p
-            key={shortid.generate()}
-            dangerouslySetInnerHTML={{ __html: log }}
-          />
-        ))}
-        {commandPromptEl}
-        {valuePromptEl}
-        <EditorModal />
-      </div>
-    );
+        onClick=this.handleTerminalClick
+      )
+        ${logs.map(
+          log => pug`
+            p(key=shortid.generate() dangerouslySetInnerHTML={ __html: log })
+          `
+        )}
+        = commandPromptEl
+        = valuePromptEl
+        EditorModal
+    `;
   }
 }

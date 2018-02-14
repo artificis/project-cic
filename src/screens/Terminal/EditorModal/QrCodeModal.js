@@ -24,25 +24,22 @@ export default class QrCodeModal extends React.Component {
   render() {
     const { open, data } = this.props;
 
-    return (
-      <Modal
-        isOpen={open}
-        fade={false}
-        toggle={this.props.closeQrCodeModal}
+    return pug`
+      Modal(
+        isOpen=open
+        fade=false
+        toggle=this.props.closeQrCodeModal
         modalClassName="d-flex align-items-center"
-      >
-        <ModalBody
-          className="d-flex justify-content-center p-4"
-          style={{ backgroundColor: '#000000' }}
-        >
-          <QRCode
-            value={data}
-            size={256}
+      )
+        ModalBody.d-flex.justify-content-center.p-4(
+          style={ backgroundColor: '#000000' }
+        )
+          QRCode(
+            value=data
+            size=256
             bgColor="#000000"
-            fgColor={terminalPrimary}
-          />
-        </ModalBody>
-      </Modal>
-    );
+            fgColor=terminalPrimary
+          )
+    `;
   }
 }

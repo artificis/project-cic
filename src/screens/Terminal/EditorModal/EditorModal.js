@@ -195,116 +195,94 @@ export default class EditorModal extends React.Component {
     const { open, uiEnabled } = this.props;
     const { activeTab, cicDataText, minimized, faqModalOpen } = this.state;
 
-    return (
-      <Modal
-        isOpen={open}
-        id="cic_data_modal"
-        fade={false}
-        tabIndex={1}
-        onKeyDown={this.handleModalKeyDown}
-      >
-        <ModalBody id="modal_body">
-          <Nav pills className="position-relative">
-            <NavItem>
-              <NavLink
-                disabled={!uiEnabled}
-                className={classnames({ active: activeTab === 'edit' })}
-                onClick={this.handleEditTabClick}
-              >
-                Edit
-              </NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink
-                disabled={!uiEnabled}
-                className={classnames({ active: activeTab === 'view' })}
-                onClick={this.handleViewTabClick}
-              >
-                View
-              </NavLink>
-            </NavItem>
-            <Button
-              className="btn-faq"
+    return pug`
+      Modal#cic_data_modal(
+        isOpen=open
+        fade=false
+        tabIndex=1
+        onKeyDown=this.handleModalKeyDown
+      )
+        ModalBody#modal_body
+          Nav.position-relative(pills)
+            NavItem
+              NavLink(
+                disabled=!uiEnabled
+                className=classnames({ active: activeTab === 'edit' })
+                onClick=this.handleEditTabClick
+              )
+                | Edit
+            NavItem
+              NavLink(
+                disabled=!uiEnabled
+                className=classnames({ active: activeTab === 'view' })
+                onClick=this.handleViewTabClick
+              )
+                | View
+            Button.btn-faq(
               size="sm"
-              outline
-              onClick={this.handleFaqButtonClick}
-            >
-              ?
-            </Button>
-            <Button
-              className="btn-toggle-min-max"
+              outline=true
+              onClick=this.handleFaqButtonClick
+            )
+              | ?
+            Button.btn-toggle-min-max(
               size="sm"
-              outline
-              onClick={this.handleToggleMinMaxButtonClick}
-            >
-              {minimized ? '↧' : '↥'}
-            </Button>
-          </Nav>
-          <TabContent activeTab={activeTab} id="tab_content">
-            <TabPane tabId="edit" className="py-3">
-              <AceEditor
+              outline=true
+              onClick=this.handleToggleMinMaxButtonClick
+            )
+              ${minimized ? '↧' : '↥'}
+          TabContent#tab_content(activeTab=activeTab)
+            TabPane.py-3(tabId="edit")
+              AceEditor(
                 mode="json"
                 theme="solarized_light"
-                value={cicDataText}
-                tabSize={2}
-                showPrintMargin={false}
+                value=cicDataText
+                tabSize=2
+                showPrintMargin=false
                 width="100%"
                 height="100%"
-                wrapEnabled
-                ref={e => {
+                wrapEnabled=true
+                ref=${e => {
                   this.aceEditor = e;
                 }}
-                onChange={this.handleAceEditorChange}
-              />
-            </TabPane>
-            <TabPane tabId="view" className="py-3 view-tab">
-              <Input
-                className="search-field"
+                onChange=this.handleAceEditorChange
+              )
+            TabPane.py-3.view-tab(tabId="view")
+              Input.search-field#search_field(
                 placeholder="🔎"
-                id="search_field"
                 autoCapitalize="off"
                 autoComplete="off"
                 autoCorrect="off"
-                value={this.props.searchKeyword}
-                onChange={this.handleSearchFieldChange}
-              />
-              <div className="table-wrapper">
-                <TableView />
-              </div>
-              <QrCodeModal />
-            </TabPane>
-          </TabContent>
-          <FaqModal isOpen={faqModalOpen} onToggle={this.handleFaqModalClose} />
-        </ModalBody>
-        <ModalFooter>
-          <Button
-            disabled={!uiEnabled}
+                value=this.props.searchKeyword
+                onChange=this.handleSearchFieldChange
+              )
+              .table-wrapper
+                TableView
+              QrCodeModal
+          FaqModal(isOpen=faqModalOpen onToggle=this.handleFaqModalClose)
+        ModalFooter
+          Button(
+            disabled=!uiEnabled
             color="primary"
             size="sm"
-            onClick={() => this.handleSaveClick()}
-          >
-            Save
-          </Button>
-          <Button
-            disabled={!uiEnabled}
+            onClick=${() => this.handleSaveClick()}
+          )
+            | Save
+          Button(
+            disabled=!uiEnabled
             color="primary"
-            outline
+            outline=true
             size="sm"
-            onClick={() => this.handleSaveClick(true)}
-          >
-            Save & Close
-          </Button>
-          <Button
-            disabled={!uiEnabled}
+            onClick=${() => this.handleSaveClick(true)}
+          )
+            | Save & Close
+          Button(
+            disabled=!uiEnabled
             color="secondary"
-            outline
+            outline=true
             size="sm"
-            onClick={this.handleCloseClick}
-          >
-            Close
-          </Button>
-        </ModalFooter>
-      </Modal>
-    );
+            onClick=this.handleCloseClick
+          )
+            | Close
+    `;
   }
 }
