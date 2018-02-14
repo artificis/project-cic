@@ -271,7 +271,7 @@ export default class Terminal extends React.Component {
             this.caret = e;
           }}
         >
-          <span>_</span>
+          <span>&nbsp;</span>
         </span>
         <p className="position-absolute w-100">&nbsp;</p>
       </div>

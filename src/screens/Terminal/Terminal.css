@@ -28,7 +28,11 @@ $line-height: 1.4rem;
   }
 
   &__caret {
-    padding-top: 3px;
+    padding-bottom: 3px;
+
+    > span {
+      border-bottom: 2px solid $terminal-primary;
+    }
   }
 }
 
