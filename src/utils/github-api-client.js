@@ -1,10 +1,15 @@
 import requestify from 'requestify';
 
+const { REACT_APP_GITHUB_CLIENT_ID: GITHUB_CLIENT_ID } = process.env;
 const GRAPHQL_ENDPOINT = 'https://api.github.com/graphql';
 const API_V3_ROOT_ENDPOINT = 'https://api.github.com';
-const limitFieldsTo = function(...fields) {
-  return node => fields.reduce((a, field) => ({ ...a, [field]: node[field] }), {});
-};
+
+function limitFieldsTo(...fields) {
+  return node =>
+    fields.reduce((a, field) => ({ ...a, [field]: node[field] }), {});
+}
+
+export const GITHUB_OAUTH_URL = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=repo`;
 
 export default class GitHubApiClient {
   constructor(token) {
@@ -16,7 +21,11 @@ export default class GitHubApiClient {
   }
 
   async requestGraphQlQuery(query, variables = {}) {
-    const response = await requestify.post(GRAPHQL_ENDPOINT, { query, variables }, this.reqOptions);
+    const response = await requestify.post(
+      GRAPHQL_ENDPOINT,
+      { query, variables },
+      this.reqOptions
+    );
     return response.getBody().data;
   }
 
@@ -38,16 +47,18 @@ export default class GitHubApiClient {
   }
 
   async repositories() {
-    let allNodes = [];
     let login;
     let nodes;
     let hasNextPage;
     let endCursor = null;
-    const ownedByMeAndNotPrivate = node => !node.isPrivate && node.owner.login === login;
+    const allNodes = [];
+    const ownedByMeAndNotPrivate = node =>
+      !node.isPrivate && node.owner.login === login;
 
+    /* eslint-disable no-await-in-loop */
     do {
-      const data = await this.requestGraphQlQuery(`
-        query ($endCursor: String) {
+      const data = await this.requestGraphQlQuery(
+        `query ($endCursor: String) {
           viewer {
             login
             repositories(isFork: false, first: 50, orderBy: { field: NAME, direction: ASC }, after: $endCursor) {
@@ -65,22 +76,27 @@ export default class GitHubApiClient {
               }
             }
           }
-        }
-      `, { endCursor });
-      ({ login, repositories: { nodes, pageInfo: { endCursor, hasNextPage } } } = data.viewer);
+        }`,
+        { endCursor }
+      );
+      ({
+        login,
+        repositories: { nodes, pageInfo: { endCursor, hasNextPage } }
+      } = data.viewer);
       allNodes.push(
         ...nodes
           .filter(ownedByMeAndNotPrivate)
           .map(limitFieldsTo('name', 'resourcePath'))
       );
     } while (hasNextPage);
+    /* eslint-enable */
 
     return allNodes;
   }
 
   async treeEntries(repoName, repoTreePath) {
-    const data = await this.requestGraphQlQuery(`
-      query ($repoName: String!, $revExpression: String!) {
+    const data = await this.requestGraphQlQuery(
+      `query ($repoName: String!, $revExpression: String!) {
         viewer {
           repository(name: $repoName) {
             object(expression: $revExpression) {
@@ -93,21 +109,26 @@ export default class GitHubApiClient {
             }
           }
         }
-      }
-    `, {
-      repoName,
-      revExpression: `master:${repoTreePath}`
-    });
+      }`,
+      { repoName, revExpression: `master:${repoTreePath}` }
+    );
     const { object } = data.viewer.repository;
     return object && object.entries ? object.entries : [];
   }
 
   createFile(repoResourcePath, filePath, options) {
-    return this.requestApiV3('PUT', `/repos${repoResourcePath}/contents/${filePath}`, options);
+    return this.requestApiV3(
+      'PUT',
+      `/repos${repoResourcePath}/contents/${filePath}`,
+      options
+    );
   }
 
   getFileContent(repoResourcePath, filePath) {
-    return this.requestApiV3('GET', `/repos${repoResourcePath}/contents/${filePath}`);
+    return this.requestApiV3(
+      'GET',
+      `/repos${repoResourcePath}/contents/${filePath}`
+    );
   }
 
   updateFile(...args) {

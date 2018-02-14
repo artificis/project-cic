@@ -1,16 +1,16 @@
 import evaluators from './evaluators';
 
 export default function evalCommand(input, log) {
-  let [command, ...args] = input.split(' ');
-  
-  command = command.toLowerCase();
+  const [commandString, ...args] = input.split(' ');
+  const command = commandString.toLowerCase();
+
   if (Object.keys(evaluators).includes(command)) {
     return evaluators[command]({
       log,
       args: args.filter(e => e !== '')
     });
-  } else {
-    log(`command not found: ${command}`);
-    return true;
   }
+
+  log(`command not found: ${command}`);
+  return true;
 }

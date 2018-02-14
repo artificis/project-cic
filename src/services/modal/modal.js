@@ -40,9 +40,11 @@ const initialState = {
   fileShaValue: null,
   masterKey: ''
 };
-
-export default handleActions({
-  [OPEN_MODAL]: (state, { payload: { mode, filePath, imageBlob, fileShaValue } }) => ({
+const reducer = {
+  [OPEN_MODAL]: (
+    state,
+    { payload: { mode, filePath, imageBlob, fileShaValue } }
+  ) => ({
     ...state,
     mode,
     filePath,
@@ -84,7 +86,8 @@ export default handleActions({
     imageBlob: null,
     cicData: {}
   })
-}, initialState);
+};
+export default handleActions(reducer, initialState);
 
 // selectors
 export const modalOpenSelector = state => state.modal.open;

@@ -30,5 +30,7 @@ export function withCommonErrorHandling(
       }
       done();
     }
-  }
-};
+  };
+}
+
+export default { withCommonErrorHandling };

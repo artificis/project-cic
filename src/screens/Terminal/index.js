@@ -1,2 +1,1 @@
-import Terminal from './Terminal';
-export default Terminal;
+module.exports = require('./Terminal');

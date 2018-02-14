@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import registerServiceWorker from 'registerServiceWorker';
 import store from 'store';
-import Router from 'screens/router';
+import Router from 'screens/_Router';
 import 'styles/application.css';
 
 const App = () => (

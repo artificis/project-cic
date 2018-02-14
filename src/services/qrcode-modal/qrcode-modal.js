@@ -13,8 +13,7 @@ const initialState = {
   open: false,
   data: ''
 };
-
-export default handleActions({
+const reducer = {
   [OPEN_QR_CODE_MODAL]: (state, { payload }) => ({
     ...state,
     open: true,
@@ -23,8 +22,9 @@ export default handleActions({
   [CLOSE_QR_CODE_MODAL]: state => ({
     ...state,
     open: false
-  }),
-}, initialState);
+  })
+};
+export default handleActions(reducer, initialState);
 
 // selectors
 export const qrCodeModalOpenSelector = state => state.qrCodeModal.open;

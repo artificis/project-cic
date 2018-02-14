@@ -4,8 +4,10 @@ import { withCommonErrorHandling } from 'utils';
 import { authTokenSelector } from 'services/auth';
 import { spitToTerminal as log } from 'services/terminal';
 import {
-  GET_REPOSITORIES, GET_REPOSITORY_TREE,
-  setRepositories, setRepositoryTree
+  GET_REPOSITORIES,
+  GET_REPOSITORY_TREE,
+  setRepositories,
+  setRepositoryTree
 } from './repo';
 
 const repositoriesLogic = createLogic({
@@ -17,36 +19,38 @@ const repositoriesLogic = createLogic({
 
     dispatch(log('&nbsp;'));
     dispatch(setRepositories(repositories));
-    for (let repository of repositories) {
+    repositories.forEach(repository => {
       dispatch(log(`<span class="text-info">${repository.name}</span>`));
-    }
+    });
   })
 });
 
 const repositoryTreeLogic = createLogic({
   type: GET_REPOSITORY_TREE,
-  process: withCommonErrorHandling(async ({ getState, action: { payload } }, dispatch) => {
-    const client = new GitHubApiClient(authTokenSelector(getState()));
-    dispatch(log('Pulling repository tree...'));
-    const { repoName, repoTreePath } = payload;
-    const entries = await client.treeEntries(repoName, repoTreePath);
+  process: withCommonErrorHandling(
+    async ({ getState, action: { payload } }, dispatch) => {
+      const client = new GitHubApiClient(authTokenSelector(getState()));
+      dispatch(log('Pulling repository tree...'));
+      const { repoName, repoTreePath } = payload;
+      const entries = await client.treeEntries(repoName, repoTreePath);
 
-    if (entries.length === 0) {
-      return dispatch(log(`repository ${repoName} is empty`));
-    }
+      if (entries.length === 0) {
+        return dispatch(log(`repository ${repoName} is empty`));
+      }
 
-    dispatch(log('&nbsp;'));
-    dispatch(setRepositoryTree(entries));
-    for (let entry of entries) {
-      dispatch(log(entry.type === 'tree'
-        ? `<span class="text-info">${entry.name}</span>`
-        : entry.name
-      ));
+      dispatch(log('&nbsp;'));
+      dispatch(setRepositoryTree(entries));
+      return entries.forEach(entry => {
+        dispatch(
+          log(
+            entry.type === 'tree'
+              ? `<span class="text-info">${entry.name}</span>`
+              : entry.name
+          )
+        );
+      });
     }
-  })
+  )
 });
 
-export default [
-  repositoriesLogic,
-  repositoryTreeLogic
-];
+export default [repositoriesLogic, repositoryTreeLogic];

@@ -1,9 +1,6 @@
 import { createAction, handleActions } from 'redux-actions';
 
-const { REACT_APP_GITHUB_CLIENT_ID } = process.env;
-
 // constants
-export const GITHUB_OAUTH_URL = `https://github.com/login/oauth/authorize?client_id=${REACT_APP_GITHUB_CLIENT_ID}&scope=repo`;
 export const GET_ACCESS_TOKEN = 'GET_ACCESS_TOKEN';
 export const SET_OAUTH_TOKEN = 'SET_OAUTH_TOKEN';
 export const SET_CURRENT_USER = 'SET_CURRENT_USER';
@@ -18,8 +15,7 @@ const initialState = {
   token: null,
   user: null
 };
-
-export default handleActions({
+const reducer = {
   [SET_OAUTH_TOKEN]: (state, { payload }) => ({
     ...state,
     token: payload
@@ -28,7 +24,8 @@ export default handleActions({
     ...state,
     user: payload
   })
-}, initialState);
+};
+export default handleActions(reducer, initialState);
 
 // selectors
 export const authenticatedSelector = state => state.auth.token !== null;

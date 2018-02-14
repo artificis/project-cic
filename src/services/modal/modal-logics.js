@@ -4,68 +4,104 @@ import { withCommonErrorHandling } from 'utils';
 import { parseFileContent } from 'utils/cic-contents';
 import { authTokenSelector } from 'services/auth';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
-import { CREATE_FILE, UPDATE_FILE, GET_FILE_CONTENT, CLOSE_MODAL, openModal, closeModal, setModalMode, setCicData, setFileShaValue } from './modal';
+import {
+  CREATE_FILE,
+  UPDATE_FILE,
+  GET_FILE_CONTENT,
+  CLOSE_MODAL,
+  openModal,
+  closeModal,
+  setModalMode,
+  setCicData,
+  setFileShaValue
+} from './modal';
 
 const newFileLogic = createLogic({
   type: CREATE_FILE,
-  process: withCommonErrorHandling(async ({ getState, action: { payload } }, dispatch) => {
-    const client = new GitHubApiClient(authTokenSelector(getState()));
-    dispatch(log('Creating a new file...'));
-    const { closeModalAfterSave, repoResourcePath, filePath, options } = payload;
-    const body = (await client.createFile(repoResourcePath, filePath, options)).getBody();
+  process: withCommonErrorHandling(
+    async ({ getState, action: { payload } }, dispatch) => {
+      const client = new GitHubApiClient(authTokenSelector(getState()));
+      dispatch(log('Creating a new file...'));
+      const { repoResourcePath, filePath, options } = payload;
+      const res = await client.createFile(repoResourcePath, filePath, options);
+      const body = res.getBody();
 
-    dispatch(log('New file created'));
-    dispatch(setModalMode('update'));
-    dispatch(setFileShaValue(body.content.sha));
+      dispatch(log('New file created'));
+      dispatch(setModalMode('update'));
+      dispatch(setFileShaValue(body.content.sha));
 
-    if (closeModalAfterSave) {
-      dispatch(closeModal());
+      if (payload.closeModalAfterSave) {
+        dispatch(closeModal());
+      }
+    },
+    {},
+    {
+      callSetTerminalBusy: false
     }
-  }, {}, {
-    callSetTerminalBusy: false
-  })
+  )
 });
 
 const fileUpdateLogic = createLogic({
   type: UPDATE_FILE,
-  process: withCommonErrorHandling(async ({ getState, action: { payload } }, dispatch) => {
-    const client = new GitHubApiClient(authTokenSelector(getState()));
-    dispatch(log('Updating file...'));
-    const { closeModalAfterSave, repoResourcePath, filePath, options } = payload;
-    const body = (await client.updateFile(repoResourcePath, filePath, options)).getBody();
-    
-    dispatch(log('File updated'));
-    dispatch(setFileShaValue(body.content.sha));
+  process: withCommonErrorHandling(
+    async ({ getState, action: { payload } }, dispatch) => {
+      const client = new GitHubApiClient(authTokenSelector(getState()));
+      dispatch(log('Updating file...'));
+      const { repoResourcePath, filePath, options } = payload;
+      const res = await client.updateFile(repoResourcePath, filePath, options);
+      const body = res.getBody();
 
-    if (closeModalAfterSave) {
-      dispatch(closeModal());
+      dispatch(log('File updated'));
+      dispatch(setFileShaValue(body.content.sha));
+
+      if (payload.closeModalAfterSave) {
+        dispatch(closeModal());
+      }
+    },
+    {},
+    {
+      callSetTerminalBusy: false
     }
-  }, {}, {
-    callSetTerminalBusy: false
-  })
+  )
 });
 
 const fileReadLogic = createLogic({
   type: GET_FILE_CONTENT,
-  process: withCommonErrorHandling(async ({ getState, action: { payload } }, dispatch) => {
-    const client = new GitHubApiClient(authTokenSelector(getState()));
-    dispatch(log('Pulling file...'));
-    const { repoResourcePath, filePath, masterKey } = payload;
-    const body = (await client.getFileContent(repoResourcePath, filePath)).getBody();
-    const [imageBlob, cicData] = parseFileContent(body.content, masterKey);
+  process: withCommonErrorHandling(
+    async ({ getState, action: { payload } }, dispatch) => {
+      const client = new GitHubApiClient(authTokenSelector(getState()));
+      dispatch(log('Pulling file...'));
+      const { repoResourcePath, filePath, masterKey } = payload;
+      const res = await client.getFileContent(repoResourcePath, filePath);
+      const body = res.getBody();
+      const [imageBlob, cicData] = parseFileContent(body.content, masterKey);
 
-    if (cicData) {
-      dispatch(setCicData(cicData));
-      dispatch(log('Entering edit/view mode...'));
-      dispatch(openModal({ imageBlob, filePath, fileShaValue: body.sha, mode: 'update' }));
-    } else {
-      dispatch(log(`open: not a valid CIC file or incorrect master key: ${body.name}`));
-      dispatch(log('&nbsp;'));
-      dispatch(setTerminalBusy(false));
+      if (cicData) {
+        dispatch(setCicData(cicData));
+        dispatch(log('Entering edit/view mode...'));
+        dispatch(
+          openModal({
+            imageBlob,
+            filePath,
+            fileShaValue: body.sha,
+            mode: 'update'
+          })
+        );
+      } else {
+        dispatch(
+          log(
+            `open: not a valid CIC file or incorrect master key: ${body.name}`
+          )
+        );
+        dispatch(log('&nbsp;'));
+        dispatch(setTerminalBusy(false));
+      }
+    },
+    {},
+    {
+      callSetTerminalBusy: false
     }
-  }, {}, {
-    callSetTerminalBusy: false
-  })
+  )
 });
 
 const modalCloseLogic = createLogic({
@@ -78,9 +114,4 @@ const modalCloseLogic = createLogic({
   }
 });
 
-export default [
-  newFileLogic,
-  fileUpdateLogic,
-  fileReadLogic,
-  modalCloseLogic
-];
+export default [newFileLogic, fileUpdateLogic, fileReadLogic, modalCloseLogic];

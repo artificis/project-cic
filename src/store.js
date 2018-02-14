@@ -9,9 +9,14 @@ const history = createHistory();
 const logicMiddleware = createLogicMiddleware(logics);
 const enhancers = [applyMiddleware(logicMiddleware, routerMiddleware(history))];
 
-if (process.env.NODE_ENV === 'development' && window.__REDUX_DEVTOOLS_EXTENSION__) {
+/* eslint-disable no-underscore-dangle */
+if (
+  process.env.NODE_ENV === 'development' &&
+  window.__REDUX_DEVTOOLS_EXTENSION__
+) {
   enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 }
+/* eslint-enable */
 
 const store = createStore(combineReducers(reducers), compose(...enhancers));
 

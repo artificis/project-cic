@@ -17,9 +17,11 @@ const mapDispatchToProps = {
 
 @connect(mapStateToProps, mapDispatchToProps)
 export default class TableView extends React.Component {
+  /* eslint-disable class-methods-use-this */
   selectWholeText(e) {
     window.getSelection().selectAllChildren(e.target);
   }
+  /* eslint-enable */
 
   handleQrCodeButtonClick(data) {
     this.props.openQrCodeModal(data);
@@ -29,7 +31,12 @@ export default class TableView extends React.Component {
     const { cicData } = this.props;
 
     return Object.keys(cicData).map(category => (
-      <Table key={shortid.generate()} striped bordered className="cic-data-table">
+      <Table
+        key={shortid.generate()}
+        striped
+        bordered
+        className="cic-data-table"
+      >
         <caption>{category}</caption>
         <thead>
           <tr>
@@ -38,7 +45,7 @@ export default class TableView extends React.Component {
             <th>Password</th>
             <th>Associated Email</th>
             <th>Notes</th>
-            <th></th>
+            <th />
           </tr>
         </thead>
         <tbody>
@@ -60,7 +67,9 @@ export default class TableView extends React.Component {
                   title="Show QR code"
                   onClick={() => this.handleQrCodeButtonClick(row[2])}
                 >
-                  <span role="img" aria-label="Show QR code">📱</span>
+                  <span role="img" aria-label="Show QR code">
+                    📱
+                  </span>
                 </Button>
               </td>
             </tr>

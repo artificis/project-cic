@@ -11,6 +11,7 @@ module.exports = (config, env) => {
   };
 
   c.resolve.modules.push(path.resolve('./src'));
+  c.module.rules[0].use[0].options.useEslintrc = true;
   delete c.module.rules[1].oneOf[1].options.babelrc;
   delete c.module.rules[1].oneOf[1].options.presets;
 

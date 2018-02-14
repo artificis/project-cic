@@ -5,13 +5,15 @@ import GitHubApiClient from 'utils/github-api-client';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
 import { GET_ACCESS_TOKEN, setOauthToken, setCurrentUser } from './auth';
 
+const { REACT_APP_API_BASE_URI: API_BASE_URI } = process.env;
+
 const loginLogic = createLogic({
   type: GET_ACCESS_TOKEN,
   process: async ({ action: { payload } }, dispatch, done) => {
     try {
       dispatch(setTerminalBusy(true));
       dispatch(log('Verifying OAuth code...'));
-      const response = await requestify.post(`${process.env.REACT_APP_API_BASE_URI}/github/oauth`, {
+      const response = await requestify.post(`${API_BASE_URI}/github/oauth`, {
         code: payload
       });
       const token = response.getBody();
@@ -40,6 +42,4 @@ const loginLogic = createLogic({
   }
 });
 
-export default [
-  loginLogic
-];
+export default [loginLogic];
