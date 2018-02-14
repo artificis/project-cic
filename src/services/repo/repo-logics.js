@@ -5,8 +5,10 @@ import { authTokenSelector } from 'services/auth';
 import {
   GET_REPOSITORIES,
   GET_REPOSITORY_TREE,
+  SET_CURRENT_REPOSITORY,
   setRepositories,
-  setRepositoryTree
+  setRepositoryTree,
+  setCurrentRepositoryRefSha
 } from './repo';
 
 const repositoriesLogic = createLogic({
@@ -51,4 +53,21 @@ const repositoryTreeLogic = createLogic({
   )
 });
 
-export default [repositoriesLogic, repositoryTreeLogic];
+const repositoryRetrievalLogic = createLogic({
+  type: SET_CURRENT_REPOSITORY,
+  process: async ({ getState, action: { payload }, dispatch }) => {
+    if (payload === null) {
+      dispatch(setCurrentRepositoryRefSha(null));
+    } else {
+      const client = new GitHubApiClient(authTokenSelector(getState()));
+      const refSha = await client.getReferenceSha(payload.resourcePath);
+      dispatch(setCurrentRepositoryRefSha(refSha));
+    }
+  }
+});
+
+export default [
+  repositoriesLogic,
+  repositoryTreeLogic,
+  repositoryRetrievalLogic
+];

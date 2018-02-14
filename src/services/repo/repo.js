@@ -7,6 +7,7 @@ export const SET_CURRENT_REPOSITORY = 'SET_CURRENT_REPOSITORY';
 export const GET_REPOSITORY_TREE = 'GET_REPOSITORY_TREE';
 export const SET_REPOSITORY_TREE = 'SET_REPOSITORY_TREE';
 export const SET_CURRENT_REPOSITORY_PATH = 'SET_CURRENT_REPOSITORY_PATH';
+export const SET_CURRENT_REPOSITORY_REF_SHA = 'SET_CURRENT_REPOSITORY_REF_SHA';
 
 // action creators
 export const getRepositories = createAction(GET_REPOSITORIES);
@@ -17,13 +18,18 @@ export const setRepositoryTree = createAction(SET_REPOSITORY_TREE);
 export const setCurrentRepositoryPath = createAction(
   SET_CURRENT_REPOSITORY_PATH
 );
+export const setCurrentRepositoryRefSha = createAction(
+  SET_CURRENT_REPOSITORY_REF_SHA
+);
 
 // reducer
 const initialState = {
   repositories: [],
   currentRepository: null,
   currentRepositoryTree: [],
-  currentRepositoryPath: ''
+  currentRepositoryPath: '',
+  currentRepositoryRefSha: null,
+  currentRepositoryRefBaseTreeSha: null
 };
 const reducer = {
   [SET_REPOSITORIES]: (state, { payload }) => ({
@@ -43,6 +49,10 @@ const reducer = {
   [SET_CURRENT_REPOSITORY_PATH]: (state, { payload }) => ({
     ...state,
     currentRepositoryPath: payload
+  }),
+  [SET_CURRENT_REPOSITORY_REF_SHA]: (state, { payload }) => ({
+    ...state,
+    currentRepositoryRefSha: payload
   })
 };
 export default handleActions(reducer, initialState);

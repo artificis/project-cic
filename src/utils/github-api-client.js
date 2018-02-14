@@ -1,8 +1,11 @@
 import requestify from 'requestify';
 
-const { REACT_APP_GITHUB_CLIENT_ID: GITHUB_CLIENT_ID } = process.env;
 const GRAPHQL_ENDPOINT = 'https://api.github.com/graphql';
 const API_V3_ROOT_ENDPOINT = 'https://api.github.com';
+const {
+  REACT_APP_GITHUB_CLIENT_ID: GITHUB_CLIENT_ID,
+  REACT_APP_GIT_REFERENCE: GIT_REFERENCE
+} = process.env;
 
 function limitFieldsTo(...fields) {
   return node =>
@@ -133,5 +136,18 @@ export default class GitHubApiClient {
 
   updateFile(...args) {
     return this.createFile(...args);
+  }
+
+  async getReferenceSha(repoResourcePath) {
+    try {
+      const response = await this.requestApiV3(
+        'GET',
+        `/repos${repoResourcePath}/git/${GIT_REFERENCE}`
+      );
+      const body = response.getBody();
+      return body.object.sha;
+    } catch (err) {
+      return null;
+    }
   }
 }
