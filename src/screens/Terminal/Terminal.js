@@ -5,7 +5,7 @@ import { createStructuredSelector } from 'reselect';
 import shortid from 'shortid';
 import queryString from 'query-string';
 
-import { getLatestAppVersion } from 'services/utils';
+import { getLatestAppVersion } from 'utils/info';
 import { getAccessToken } from 'services/auth';
 import {
   terminalLogsSelector, terminalBusyStateSelector, terminalValuePromptModeSelector,

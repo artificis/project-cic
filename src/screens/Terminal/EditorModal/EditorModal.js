@@ -9,6 +9,7 @@ import {
 } from 'reactstrap';
 import classnames from 'classnames';
 
+import { generateFileContent } from 'utils/cic-contents';
 import {
   modalOpenSelector, modalUiEnabledSelector, modalModeSelector, masterKeySelector,
   modalFilePathSelector, imageBlobSelector, cicDataSelector, modalFileShaValueSelector,
@@ -16,7 +17,6 @@ import {
   setSearchKeyword, closeModal, setCicData, createFile, updateFile
 } from 'services/modal';
 import { currentRepositorySelector } from 'services/repo';
-import { generateFileContent } from 'services/utils';
 import FaqModal from './FaqModal';
 import TableView from './TableView';
 import QrCodeModal from './QrCodeModal';

@@ -1,6 +1,7 @@
 import { createLogic } from 'redux-logic';
-import GitHubApiClient from 'services/GitHubApiClient';
-import { withCommonErrorHandling, parseFileContent } from 'services/utils';
+import GitHubApiClient from 'utils/github-api-client';
+import { withCommonErrorHandling } from 'utils';
+import { parseFileContent } from 'utils/cic-contents';
 import { authTokenSelector } from 'services/auth';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
 import { CREATE_FILE, UPDATE_FILE, GET_FILE_CONTENT, CLOSE_MODAL, openModal, closeModal, setModalMode, setCicData, setFileShaValue } from './modal';

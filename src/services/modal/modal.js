@@ -1,5 +1,5 @@
 import { createAction, handleActions } from 'redux-actions';
-import { filteredCicData } from 'services/utils';
+import { filteredCicData } from 'utils/cic-contents';
 
 // constants
 export const OPEN_MODAL = 'OPEN_MODAL';

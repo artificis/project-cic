@@ -1,6 +1,6 @@
 import { createLogic } from 'redux-logic';
-import GitHubApiClient from 'services/GitHubApiClient';
-import { withCommonErrorHandling } from 'services/utils';
+import GitHubApiClient from 'utils/github-api-client';
+import { withCommonErrorHandling } from 'utils';
 import { authTokenSelector } from 'services/auth';
 import { spitToTerminal as log } from 'services/terminal';
 import {

@@ -1,7 +1,7 @@
 import { createLogic } from 'redux-logic';
 import requestify from 'requestify';
 import { history } from 'store';
-import GitHubApiClient from 'services/GitHubApiClient';
+import GitHubApiClient from 'utils/github-api-client';
 import { setTerminalBusy, spitToTerminal as log } from 'services/terminal';
 import { GET_ACCESS_TOKEN, setOauthToken, setCurrentUser } from './auth';
 
