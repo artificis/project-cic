@@ -5,7 +5,7 @@
   "homepage": "https://knocknock-team.github.io/project-cic-frontend",
   "dependencies": {
     "autobind-decorator": "^2.1.0",
-    "bootstrap": "^4.0.0-beta.2",
+    "bootstrap": "^4.0.0",
     "brace": "^0.11.0",
     "classnames": "^2.2.5",
     "history": "^4.7.2",
@@ -19,7 +19,7 @@
     "react-redux": "^5.0.6",
     "react-router-dom": "^4.2.2",
     "react-router-redux": "^5.0.0-alpha.8",
-    "reactstrap": "^5.0.0-alpha.4",
+    "reactstrap": "^5.0.0-beta",
     "redux": "^3.7.2",
     "redux-actions": "^2.2.1",
     "redux-logic": "^0.12.3",
