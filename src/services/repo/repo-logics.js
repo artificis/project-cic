@@ -8,8 +8,11 @@ import {
   SET_CURRENT_REPOSITORY,
   setRepositories,
   setRepositoryTree,
-  setCurrentRepositoryRefSha
+  setCurrentRepositoryRefSha,
+  setCurrentRepositoryRefBaseTreeSha
 } from './repo';
+
+const { REACT_APP_GIT_REFERENCE: GIT_REFERENCE } = process.env;
 
 const repositoriesLogic = createLogic({
   type: GET_REPOSITORIES,
@@ -55,14 +58,28 @@ const repositoryTreeLogic = createLogic({
 
 const repositoryRetrievalLogic = createLogic({
   type: SET_CURRENT_REPOSITORY,
-  process: async ({ getState, action: { payload }, dispatch }) => {
+  process: async ({ getState, action: { payload } }, dispatch, done) => {
     if (payload === null) {
       dispatch(setCurrentRepositoryRefSha(null));
+      dispatch(setCurrentRepositoryRefBaseTreeSha(null));
     } else {
+      const { resourcePath } = payload;
       const client = new GitHubApiClient(authTokenSelector(getState()));
-      const refSha = await client.getReferenceSha(payload.resourcePath);
-      dispatch(setCurrentRepositoryRefSha(refSha));
+      let response = await client.getReferences(resourcePath);
+      const reference = response.getBody().find(e => e.ref === GIT_REFERENCE);
+
+      if (reference) {
+        const { sha } = reference.object;
+        dispatch(setCurrentRepositoryRefSha(sha));
+        response = await client.getCommit(resourcePath, sha);
+        const baseTreeSHA = response.getBody().tree.sha;
+        dispatch(setCurrentRepositoryRefBaseTreeSha(baseTreeSHA));
+      } else {
+        dispatch(setCurrentRepositoryRefSha(null));
+        dispatch(setCurrentRepositoryRefBaseTreeSha(null));
+      }
     }
+    done();
   }
 });
 

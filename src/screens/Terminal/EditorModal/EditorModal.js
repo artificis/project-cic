@@ -23,20 +23,15 @@ import { generateFileContent } from 'utils/cic-contents';
 import {
   modalOpenSelector,
   modalUiEnabledSelector,
-  modalModeSelector,
   masterKeySelector,
-  modalFilePathSelector,
   imageBlobSelector,
   cicDataSelector,
-  modalFileShaValueSelector,
   searchKeywordSelector,
   setSearchKeyword,
   closeModal,
   setCicData,
-  createFile,
-  updateFile
+  saveFile
 } from 'services/modal';
-import { currentRepositorySelector } from 'services/repo';
 import FaqModal from './FaqModal';
 import TableView from './TableView';
 import QrCodeModal from './QrCodeModal';
@@ -45,22 +40,17 @@ import './EditorModal.css';
 const mapStateToProps = createStructuredSelector({
   open: modalOpenSelector,
   uiEnabled: modalUiEnabledSelector,
-  mode: modalModeSelector,
-  filePath: modalFilePathSelector,
   imageBlob: imageBlobSelector,
   cicData: cicDataSelector,
   searchKeyword: searchKeywordSelector,
-  fileShaValue: modalFileShaValueSelector,
-  masterKey: masterKeySelector,
-  currentRepository: currentRepositorySelector
+  masterKey: masterKeySelector
 });
 
 const mapDispatchToProps = {
   closeModal,
   setCicData,
   setSearchKeyword,
-  createFile,
-  updateFile
+  saveFile
 };
 
 @connect(mapStateToProps, mapDispatchToProps)
@@ -146,15 +136,8 @@ export default class EditorModal extends React.Component {
 
   @autobind
   handleSaveClick(closeModalAfterSave = false) {
-    const { mode, filePath, imageBlob, cicData, fileShaValue } = this.props;
-    const { masterKey } = this.props;
-    const {
-      currentRepository: { resourcePath: repoResourcePath }
-    } = this.props;
+    const { imageBlob, cicData, masterKey } = this.props;
     const { activeTab } = this.state;
-    const saveFile =
-      mode === 'create' ? this.props.createFile : this.props.updateFile;
-    const extraOptions = mode === 'update' ? { sha: fileShaValue } : {};
     let data = cicData;
 
     if (activeTab === 'edit') {
@@ -168,15 +151,10 @@ export default class EditorModal extends React.Component {
     }
 
     if (data) {
-      saveFile({
+      this.props.saveFile({
         closeModalAfterSave,
-        repoResourcePath,
-        filePath,
-        options: {
-          ...extraOptions,
-          content: generateFileContent(imageBlob, data, masterKey),
-          message: 'Update CIC data'
-        }
+        content: generateFileContent(imageBlob, data, masterKey),
+        message: 'Update CIC data'
       });
     }
   }

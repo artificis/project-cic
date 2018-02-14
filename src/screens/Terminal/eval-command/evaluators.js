@@ -14,6 +14,7 @@ import {
   currentRepositorySelector,
   currentRepositoryTreeSelector,
   currentRepositoryPathSelector,
+  currentRepositoryRefShaSelector,
   getRepositories,
   setRepositories,
   setCurrentRepository,
@@ -32,7 +33,8 @@ const selector = createStructuredSelector({
   repositories: repositoriesSelector,
   currentRepository: currentRepositorySelector,
   currentRepoTree: currentRepositoryTreeSelector,
-  currentRepoPath: currentRepositoryPathSelector
+  currentRepoPath: currentRepositoryPathSelector,
+  currentRepositoryRefSHA: currentRepositoryRefShaSelector
 });
 const state = () => selector(getState());
 
@@ -177,28 +179,25 @@ class Command {
     'new'
   )
   @requiresAuth
-  static newFile({ args, log }) {
-    const { currentRepository, currentRepoPath } = state();
-    if (args.length === 0) {
-      log('usage:');
-      log('new &lt;filename&gt;');
-    } else if (currentRepository === null) {
+  static newFile({ log }) {
+    const { currentRepository } = state();
+    if (currentRepository === null) {
       log('new: you are currently not inside a repository');
-    } else if (this.fileExists(args[0])) {
-      log(`new: file already exists: ${args[0]}`);
+    } else if (this.fileExists()) {
+      log('new: file already exists');
     } else {
-      this.promptToCreateMasterKey(joinPath(currentRepoPath, args[0]), log);
+      this.promptToCreateMasterKey(log);
       return false;
     }
     return true;
   }
 
-  static fileExists(fileName) {
-    const { currentRepoTree } = state();
-    return currentRepoTree.find(e => e.name === fileName);
+  static fileExists() {
+    const { currentRepositoryRefSHA } = state();
+    return currentRepositoryRefSHA !== null;
   }
 
-  static promptToCreateMasterKey(filePath, log) {
+  static promptToCreateMasterKey(log) {
     dispatch(
       setTerminalValuePromptMode({
         passwordMode: true,
@@ -212,10 +211,10 @@ class Command {
                 if (masterKey === masterKeyConfirmation) {
                   dispatch(setMasterKey(masterKey));
                   dispatch(setTerminalBusy(false));
-                  this.openNewImageFileDialog(filePath, log);
+                  this.openNewImageFileDialog(log);
                 } else {
                   log('Master passwords do not match. Try again.');
-                  this.promptToCreateMasterKey(filePath, log);
+                  this.promptToCreateMasterKey(log);
                 }
               }
             })
@@ -225,7 +224,7 @@ class Command {
     );
   }
 
-  static openNewImageFileDialog(filePath, log) {
+  static openNewImageFileDialog(log) {
     const fileInput = document.createElement('input');
     log('Please choose an image file');
     log('&nbsp;');
@@ -238,14 +237,7 @@ class Command {
           const imageBlob = atob(reader.result.split(',')[1]);
           log('Image file read');
           log('Entering edit/view mode...');
-          dispatch(
-            openModal({
-              imageBlob,
-              filePath,
-              fileShaValue: null,
-              mode: 'create'
-            })
-          );
+          dispatch(openModal({ imageBlob }));
         };
         dispatch(setTerminalBusy(true));
         log('Reading image file...');
@@ -257,35 +249,22 @@ class Command {
 
   @command('open an existing CIC file')
   @requiresAuth
-  static open({ args, log }) {
-    const { currentRepository, currentRepoTree, currentRepoPath } = state();
-    if (args.length === 0) {
-      log('usage:');
-      log('open &lt;filename&gt;');
-    } else if (currentRepository === null) {
+  static open({ log }) {
+    const { currentRepository } = state();
+    if (currentRepository === null) {
       log('open: you are currently not inside a repository');
-    } else if (
-      currentRepoTree.find(e => e.name === args[0] && e.type !== 'tree')
-    ) {
+    } else {
       dispatch(
         setTerminalValuePromptMode({
           passwordMode: true,
           promptLabel: 'Enter master password:&nbsp;',
           onConfirm: masterKey => {
             dispatch(setMasterKey(masterKey));
-            dispatch(
-              getFileContent({
-                masterKey,
-                repoResourcePath: currentRepository.resourcePath,
-                filePath: joinPath(currentRepoPath, args[0])
-              })
-            );
+            dispatch(getFileContent({ masterKey }));
           }
         })
       );
       return false;
-    } else {
-      log(`open: no such file: ${args[0]}`);
     }
     return true;
   }

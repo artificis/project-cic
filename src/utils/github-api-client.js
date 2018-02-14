@@ -119,35 +119,67 @@ export default class GitHubApiClient {
     return object && object.entries ? object.entries : [];
   }
 
-  createFile(repoResourcePath, filePath, options) {
+  getReferences(repoResourcePath) {
+    return this.requestApiV3('GET', `/repos${repoResourcePath}/git/refs`);
+  }
+
+  getCommit(repoResourcePath, sha) {
     return this.requestApiV3(
-      'PUT',
-      `/repos${repoResourcePath}/contents/${filePath}`,
+      'GET',
+      `/repos${repoResourcePath}/git/commits/${sha}`
+    );
+  }
+
+  getTreeObject(repoResourcePath, sha) {
+    return this.requestApiV3(
+      'GET',
+      `/repos${repoResourcePath}/git/trees/${sha}`
+    );
+  }
+
+  getBlob(repoResourcePath, sha) {
+    return this.requestApiV3(
+      'GET',
+      `/repos${repoResourcePath}/git/blobs/${sha}`
+    );
+  }
+
+  createBlob(repoResourcePath, options) {
+    return this.requestApiV3(
+      'POST',
+      `/repos${repoResourcePath}/git/blobs`,
       options
     );
   }
 
-  getFileContent(repoResourcePath, filePath) {
+  createTreeObject(repoResourcePath, options) {
     return this.requestApiV3(
-      'GET',
-      `/repos${repoResourcePath}/contents/${filePath}`
+      'POST',
+      `/repos${repoResourcePath}/git/trees`,
+      options
     );
   }
 
-  updateFile(...args) {
-    return this.createFile(...args);
+  createCommit(repoResourcePath, options) {
+    return this.requestApiV3(
+      'POST',
+      `/repos${repoResourcePath}/git/commits`,
+      options
+    );
   }
 
-  async getReferenceSha(repoResourcePath) {
-    try {
-      const response = await this.requestApiV3(
-        'GET',
-        `/repos${repoResourcePath}/git/${GIT_REFERENCE}`
-      );
-      const body = response.getBody();
-      return body.object.sha;
-    } catch (err) {
-      return null;
-    }
+  createReference(repoResourcePath, sha) {
+    return this.requestApiV3('POST', `/repos${repoResourcePath}/git/refs`, {
+      sha,
+      ref: GIT_REFERENCE
+    });
+  }
+
+  updateReference(repoResourcePath, sha) {
+    return this.requestApiV3(
+      'PATCH',
+      `/repos${repoResourcePath}/git/${GIT_REFERENCE}`,
+      { sha }
+    );
   }
 }
