@@ -24,9 +24,11 @@ const contents = `
 export default ({ isOpen, onToggle }) => (
   <Modal isOpen={isOpen} toggle={onToggle} size="lg">
     <ModalHeader>CIC Data Format</ModalHeader>
-    <ModalBody dangerouslySetInnerHTML={{ __html: marked(contents) }}></ModalBody>
+    <ModalBody dangerouslySetInnerHTML={{ __html: marked(contents) }} />
     <ModalFooter>
-      <Button color="primary" size="sm" onClick={onToggle}>Close</Button>
+      <Button color="primary" size="sm" onClick={onToggle}>
+        Close
+      </Button>
     </ModalFooter>
   </Modal>
 );

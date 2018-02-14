@@ -4,9 +4,11 @@ import { createStructuredSelector } from 'reselect';
 import { Modal, ModalBody } from 'reactstrap';
 import QRCode from 'qrcode.react';
 import {
-  qrCodeModalOpenSelector, qrCodeModalDataSelector, closeQrCodeModal
+  qrCodeModalOpenSelector,
+  qrCodeModalDataSelector,
+  closeQrCodeModal
 } from 'services/qrcode-modal';
-import { primaryColor } from 'styles/_base.scss';
+import { terminalPrimary } from 'styles/_variables.css';
 
 const mapStateToProps = createStructuredSelector({
   open: qrCodeModalOpenSelector,
@@ -20,13 +22,13 @@ const mapDispatchToProps = {
 @connect(mapStateToProps, mapDispatchToProps)
 export default class QrCodeModal extends React.Component {
   render() {
-    const { open, data, closeQrCodeModal } = this.props;
+    const { open, data } = this.props;
 
     return (
       <Modal
         isOpen={open}
         fade={false}
-        toggle={closeQrCodeModal}
+        toggle={this.props.closeQrCodeModal}
         modalClassName="d-flex align-items-center"
       >
         <ModalBody
@@ -37,7 +39,7 @@ export default class QrCodeModal extends React.Component {
             value={data}
             size={256}
             bgColor="#000000"
-            fgColor={primaryColor}
+            fgColor={terminalPrimary}
           />
         </ModalBody>
       </Modal>

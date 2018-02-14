@@ -1,2 +1,1 @@
-import Router from './_Router';
-export default Router;
+module.exports = require('./Router');

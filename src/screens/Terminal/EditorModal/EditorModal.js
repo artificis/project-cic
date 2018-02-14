@@ -3,27 +3,44 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import autobind from 'autobind-decorator';
 import AceEditor from 'react-ace';
-import {
-  Input, Modal, ModalBody, ModalFooter, Button,
-  Nav, NavItem, NavLink, TabContent, TabPane
-} from 'reactstrap';
-import classnames from 'classnames';
-
-import {
-  modalOpenSelector, modalUiEnabledSelector, modalModeSelector, masterKeySelector,
-  modalFilePathSelector, imageBlobSelector, cicDataSelector, modalFileShaValueSelector,
-  searchKeywordSelector,
-  setSearchKeyword, closeModal, setCicData, createFile, updateFile
-} from 'services/modal';
-import { currentRepositorySelector } from 'services/repo';
-import { generateFileContent } from 'services/utils';
-import FaqModal from './FaqModal';
-import TableView from './TableView';
-import QrCodeModal from './QrCodeModal';
-
 import 'brace/mode/json';
 import 'brace/theme/solarized_light';
 import 'brace/ext/searchbox';
+import {
+  Input,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  Button,
+  Nav,
+  NavItem,
+  NavLink,
+  TabContent,
+  TabPane
+} from 'reactstrap';
+import classnames from 'classnames';
+import { generateFileContent } from 'utils/cic-contents';
+import {
+  modalOpenSelector,
+  modalUiEnabledSelector,
+  modalModeSelector,
+  masterKeySelector,
+  modalFilePathSelector,
+  imageBlobSelector,
+  cicDataSelector,
+  modalFileShaValueSelector,
+  searchKeywordSelector,
+  setSearchKeyword,
+  closeModal,
+  setCicData,
+  createFile,
+  updateFile
+} from 'services/modal';
+import { currentRepositorySelector } from 'services/repo';
+import FaqModal from './FaqModal';
+import TableView from './TableView';
+import QrCodeModal from './QrCodeModal';
+import './EditorModal.css';
 
 const mapStateToProps = createStructuredSelector({
   open: modalOpenSelector,
@@ -53,11 +70,13 @@ export default class EditorModal extends React.Component {
     cicDataText: '{}',
     minimized: false,
     faqModalOpen: false
-  }
+  };
 
   componentWillReceiveProps(nextProps) {
     if (this.props.open === false && nextProps.open === true) {
-      this.setState({ cicDataText: JSON.stringify(nextProps.cicData, null, 2) });
+      this.setState({
+        cicDataText: JSON.stringify(nextProps.cicData, null, 2)
+      });
     }
   }
 
@@ -73,10 +92,12 @@ export default class EditorModal extends React.Component {
       if (Array.isArray(json)) {
         return false;
       }
-      if (Object.keys(json).every(key => {
-        if (!Array.isArray(json[key])) return false;
-        return json[key].every(row => row.length === 5);
-      })) {
+      if (
+        Object.keys(json).every(key => {
+          if (!Array.isArray(json[key])) return false;
+          return json[key].every(row => row.length === 5);
+        })
+      ) {
         return json;
       }
       return false;
@@ -104,7 +125,7 @@ export default class EditorModal extends React.Component {
       this.switchTabTo('view');
     } else {
       this.aceEditor.editor.focus();
-      alert('Invalid JSON syntax or CIC data format');
+      alert('Invalid JSON syntax or CIC data format'); // eslint-disable-line
     }
   }
 
@@ -125,23 +146,24 @@ export default class EditorModal extends React.Component {
 
   @autobind
   handleSaveClick(closeModalAfterSave = false) {
+    const { mode, filePath, imageBlob, cicData, fileShaValue } = this.props;
+    const { masterKey } = this.props;
     const {
-      mode, filePath, imageBlob, cicData, fileShaValue, masterKey,
-      currentRepository: { resourcePath: repoResourcePath },
-      setCicData, createFile, updateFile
+      currentRepository: { resourcePath: repoResourcePath }
     } = this.props;
     const { activeTab } = this.state;
-    const saveFile = mode === 'create' ? createFile : updateFile;
+    const saveFile =
+      mode === 'create' ? this.props.createFile : this.props.updateFile;
     const extraOptions = mode === 'update' ? { sha: fileShaValue } : {};
     let data = cicData;
 
     if (activeTab === 'edit') {
       data = this.validateCicData();
       if (data) {
-        setCicData(data);
+        this.props.setCicData(data);
       } else {
         this.aceEditor.editor.focus();
-        alert('Invalid JSON syntax or CIC data format');
+        alert('Invalid JSON syntax or CIC data format'); // eslint-disable-line
       }
     }
 
@@ -196,7 +218,13 @@ export default class EditorModal extends React.Component {
     const { activeTab, cicDataText, minimized, faqModalOpen } = this.state;
 
     return (
-      <Modal isOpen={open} id="cic_data_modal" fade={false} tabIndex={1} onKeyDown={this.handleModalKeyDown}>
+      <Modal
+        isOpen={open}
+        id="cic_data_modal"
+        fade={false}
+        tabIndex={1}
+        onKeyDown={this.handleModalKeyDown}
+      >
         <ModalBody id="modal_body">
           <Nav pills className="position-relative">
             <NavItem>
@@ -245,7 +273,9 @@ export default class EditorModal extends React.Component {
                 width="100%"
                 height="100%"
                 wrapEnabled
-                ref={e => { this.aceEditor = e; }}
+                ref={e => {
+                  this.aceEditor = e;
+                }}
                 onChange={this.handleAceEditorChange}
               />
             </TabPane>
@@ -260,16 +290,41 @@ export default class EditorModal extends React.Component {
                 value={this.props.searchKeyword}
                 onChange={this.handleSearchFieldChange}
               />
-              <div className="table-wrapper"><TableView /></div>
+              <div className="table-wrapper">
+                <TableView />
+              </div>
               <QrCodeModal />
             </TabPane>
           </TabContent>
           <FaqModal isOpen={faqModalOpen} onToggle={this.handleFaqModalClose} />
         </ModalBody>
         <ModalFooter>
-          <Button disabled={!uiEnabled} color="primary" size="sm" onClick={() => this.handleSaveClick()}>Save</Button>
-          <Button disabled={!uiEnabled} color="primary" outline size="sm" onClick={() => this.handleSaveClick(true)}>Save & Close</Button>
-          <Button disabled={!uiEnabled} color="secondary" outline size="sm" onClick={this.handleCloseClick}>Close</Button>
+          <Button
+            disabled={!uiEnabled}
+            color="primary"
+            size="sm"
+            onClick={() => this.handleSaveClick()}
+          >
+            Save
+          </Button>
+          <Button
+            disabled={!uiEnabled}
+            color="primary"
+            outline
+            size="sm"
+            onClick={() => this.handleSaveClick(true)}
+          >
+            Save & Close
+          </Button>
+          <Button
+            disabled={!uiEnabled}
+            color="secondary"
+            outline
+            size="sm"
+            onClick={this.handleCloseClick}
+          >
+            Close
+          </Button>
         </ModalFooter>
       </Modal>
     );
