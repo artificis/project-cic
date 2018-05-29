@@ -2,7 +2,7 @@
   "name": "cic-frontend",
   "version": "3.0.0",
   "private": true,
-  "homepage": "https://knocknock-team.github.io/project-cic-frontend",
+  "homepage": "https://artificis.github.io/project-cic",
   "dependencies": {
     "autobind-decorator": "^2.1.0",
     "bootstrap": "^4.0.0",
