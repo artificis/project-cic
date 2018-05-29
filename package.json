@@ -1,6 +1,6 @@
 {
   "name": "cic-frontend",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "private": true,
   "homepage": "https://artificis.github.io/project-cic",
   "dependencies": {
