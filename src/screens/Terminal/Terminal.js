@@ -103,15 +103,19 @@ export default class Terminal extends React.Component {
     this.props.setTerminalBusy(true);
     log('Checking for updates...');
 
-    const latestVersion = await getLatestAppVersion();
-    if (latestVersion === `v${appVersion}`) {
-      log('You are using the latest version.');
-    } else {
-      log(`Project CIC ${latestVersion} is now available.`);
-      log(`You have v${appVersion}.`);
-      log(
-        'Please update by reloading this page. If it does not update after reloading the page, please try again after a few minutes.'
-      );
+    try {
+      const latestVersion = await getLatestAppVersion();
+      if (latestVersion === `v${appVersion}`) {
+        log('You are using the latest version.');
+      } else {
+        log(`Project CIC ${latestVersion} is now available.`);
+        log(`You have v${appVersion}.`);
+        log(
+          'Please update by reloading this page. If it does not update after reloading the page, please try again after a few minutes.'
+        );
+      }
+    } catch (err) {
+      log('Failed to check update!');
     }
 
     log('&nbsp;');
